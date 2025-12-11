@@ -80,11 +80,11 @@ public class BookingService {
                 throw new BookingException("Ngày trả phòng phải sau ngày nhận phòng.");
             }
 
-            RoomType roomType = getRoomTypeOrThrow(roomTypeId);
-            long days = calculateDays(checkInDate, checkOutDate);
-            double totalAmount = roomType.getBasePrice() * quantity * days;
+             RoomType roomType = getRoomTypeOrThrow(roomTypeId);
+             long days = calculateDays(checkInDate, checkOutDate);
+             double totalAmount = roomType.getBasePrice() * quantity * days;
 
-            List<Room> availableRooms = roomRepository.findAvailableRoomsByType(roomTypeId);
+             List<Room> availableRooms = roomRepository.findAvailableRoomsByTypeAndDate(roomTypeId, checkIn, checkOut);
             if (availableRooms.size() < quantity) {
                 throw new BookingException("Không đủ phòng trống. Chỉ còn " + availableRooms.size() + " phòng.");
             }
