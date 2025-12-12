@@ -36,5 +36,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
                                                @Param("checkOutDate") Date checkOutDate);
     
     List<Room> findByRoomStatus(Room_Status roomStatus);
-}
 
+    @Query("SELECT count(r) FROM Room r WHERE r.roomType.roomTypeId = :roomTypeId")
+    int countByRoomTypeId(@Param("roomTypeId") int roomTypeId);
+}
