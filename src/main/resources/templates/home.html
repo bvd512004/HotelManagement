@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khách sạn chúng tôi - Trải nghiệm kỳ nghỉ lý tưởng</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: #20b2aa; /* Teal color */
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .phone-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .phone-icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .phone-section:hover {
+            opacity: 0.9;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+            margin: 0;
+            padding: 0;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: opacity 0.3s;
+        }
+
+        .nav-menu a:hover {
+            opacity: 0.8;
+        }
+
+        .book-btn {
+            background: white;
+            color: #20b2aa; /* Teal color */
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .book-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920') center/cover;
+            height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+            animation: fadeInUp 1.2s ease;
+        }
+
+        .cta-button {
+            background: #20b2aa;
+            color: white;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeInUp 1.4s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255,107,107,0.5);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Gallery Section */
+        .gallery {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #333;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 300px;
+            background: #f0f0f0;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section {
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #ecf0f1;
+            text-decoration: none;
+            margin: 0.5rem 0;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: #ff6b6b;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #34495e;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            color: #95a5a6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .phone-section {
+                order: 1;
+            }
+
+            .book-btn {
+                order: 2;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="tel:+84389330198" class="phone-section">
+                <svg class="phone-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+                <span>+84389330198</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a th:href="@{/}">Khách sạn chúng tôi</a></li>
+                <li><a th:href="@{/gallery}">Lưu giữ khoảnh khắc</a></li>
+                <li><a th:href="@{/rooms}">Hạng phòng</a></li>
+            </ul>
+            <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Trải nghiệm kỳ nghỉ lý tưởng tại đây</h1>
+            <p>Nơi nghỉ dưỡng tuyệt vời với dịch vụ chuyên nghiệp, không gian sang trọng và vị trí thuận tiện. Đặt phòng ngay hôm nay để tận hưởng kỳ nghỉ đáng nhớ!</p>
+            <a th:href="@{/booking}" class="cta-button">Tìm hiểu nào!</a>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery" id="gallery">
+        <div class="gallery-container">
+            <h2 class="gallery-title">Lưu giữ khoảnh khắc</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel1.jpg}" 
+                         src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop" 
+                         alt="Phòng khách sạn sang trọng" 
+                         onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel2.jpg}" 
+                         src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop" 
+                         alt="Không gian nghỉ dưỡng" 
+                         onerror="this.src='https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel3.jpg}" 
+                         src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&h=600&fit=crop" 
+                         alt="Phòng ngủ hiện đại" 
+                         onerror="this.src='https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel4.jpg}" 
+                         src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&h=600&fit=crop" 
+                         alt="Hồ bơi khách sạn" 
+                         onerror="this.src='https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel5.jpg}" 
+                         src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop" 
+                         alt="Phòng view đẹp" 
+                         onerror="this.src='https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel6.jpg}" 
+                         src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&h=600&fit=crop" 
+                         alt="Không gian sang trọng" 
+                         onerror="this.src='https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel7.jpg}" 
+                         src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&h=600&fit=crop" 
+                         alt="Phòng tắm cao cấp" 
+                         onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel8.jpg}" 
+                         src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&h=600&fit=crop" 
+                         alt="Khu vực thư giãn" 
+                         onerror="this.src='https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&h=600&fit=crop'">
+                </div>
+                <div class="gallery-item">
+                    <img th:src="@{/images/hotel9.jpg}" 
+                         src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&h=600&fit=crop" 
+                         alt="View ban công đẹp" 
+                         onerror="this.src='https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&h=600&fit=crop'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Liên hệ với chúng tôi</h3>
+                <p><a href="tel:+84389330198">+84 389 330 198</a></p>
+                <p>Địa chỉ: Thành phố Hà Nội</p>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Khách sạn chúng tôi. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+

@@ -4,6 +4,7 @@ import com.hsf302.hotelmanagement.entity.Floor;
 import com.hsf302.hotelmanagement.entity.Room;
 import com.hsf302.hotelmanagement.entity.RoomType;
 import com.hsf302.hotelmanagement.service.RoomService;
+import com.hsf302.hotelmanagement.repository.RoomTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +19,9 @@ import java.util.List;
 public class RoomController {
     @Autowired
     private RoomService roomService;
+
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
 
 @GetMapping("/viewRoomsByManager")
     public String viewRoomsByManager(Model model){
@@ -65,4 +69,17 @@ public class RoomController {
         roomService.addNewRoom(r);
         return "viewRoomsByManager";
     }
+
+    @GetMapping("/rooms")
+    public String rooms(Model model) {
+        List<RoomType> roomTypes = roomTypeRepository.findAll();
+        model.addAttribute("roomTypes", roomTypes);
+        return "rooms";
+    }
+
+    @GetMapping("/gallery")
+    public String gallery() {
+        return "gallery";
+    }
+
 }
