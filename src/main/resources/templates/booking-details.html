@@ -446,7 +446,7 @@
 
     <!-- Bottom Bar -->
     <div class="bottom-bar">
-        <a th:href="@{/booking}" class="back-btn">← Chọn lại</a>
+        <a th:href="@{/booking(checkInDate=${checkInDate}, checkOutDate=${checkOutDate}, adults=${adults}, children=${children})}" class="back-btn">← Chọn lại</a>
         <div class="selected-info">
             <span th:text="${adults} + ' người lớn, ' + ${children} + ' trẻ em, ' + ${quantity} + ' phòng, ' + 'từ ' + ${checkInDate} + ' đến ' + ${checkOutDate}">1 người lớn, 0 trẻ em, 1 phòng</span>
             <span ></span>
@@ -458,4 +458,3 @@
     </div>
 </body>
 </html>
-

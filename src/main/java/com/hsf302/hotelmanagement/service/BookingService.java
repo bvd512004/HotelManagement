@@ -43,6 +43,21 @@ public class BookingService {
                 new BookingException("Không tìm thấy hạng phòng."));
     }
 
+    public int getAvailableRoomCount(int roomTypeId, String checkInDate, String checkOutDate) {
+        try {
+            if (checkInDate == null || checkInDate.trim().isEmpty() ||
+                checkOutDate == null || checkOutDate.trim().isEmpty()) {
+                return roomRepository.countByRoomTypeId(roomTypeId);
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date checkIn = sdf.parse(checkInDate.trim());
+            Date checkOut = sdf.parse(checkOutDate.trim());
+            return roomRepository.findAvailableRoomsByTypeAndDate(roomTypeId, checkIn, checkOut).size();
+        } catch (ParseException e) {
+            return roomRepository.countByRoomTypeId(roomTypeId);
+        }
+    }
+
     public long calculateDays(String checkInDate, String checkOutDate) {
         try {
             if (checkInDate == null || checkInDate.trim().isEmpty() ||
@@ -125,4 +140,3 @@ public class BookingService {
         }
     }
 }
-
