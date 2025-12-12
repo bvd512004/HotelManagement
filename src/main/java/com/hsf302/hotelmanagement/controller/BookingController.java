@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class BookingController {
@@ -38,7 +40,14 @@ public class BookingController {
             Model model) {
         
         List<RoomType> roomTypes = bookingService.getAllRoomTypes();
+        Map<Integer, Integer> availableRoomCounts = new HashMap<>();
+        for (RoomType roomType : roomTypes) {
+            int count = bookingService.getAvailableRoomCount(roomType.getRoomTypeId(), checkInDate, checkOutDate);
+            availableRoomCounts.put(roomType.getRoomTypeId(), count);
+        }
+
         model.addAttribute("roomTypes", roomTypes);
+        model.addAttribute("availableRoomCounts", availableRoomCounts);
         model.addAttribute("checkInDate", checkInDate);
         model.addAttribute("checkOutDate", checkOutDate);
         model.addAttribute("adults", adults);
@@ -156,4 +165,3 @@ public class BookingController {
         return "booking-success";
     }
 }
-
