@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Room</title>
+</head>
+<body>
+<form action="addRoom" method="post">
+    Number: <input type="text" name="name" required><br>
+    Type: <select name="type">
+            <option value="">-- Select Room Type --</option>
+            <option th:each="rt : ${rtList}"
+                    th:value="${rt.typeName}"
+                    th:text="${rt.typeName}"></option>
+          </select><br>
+    Floor: <select name="floor">
+             <option value="">-- Select Floor --</option>
+             <option th:each="f : ${fList}"
+                     th:value="${f.floor_number}"
+                     th:text="${f.floor_number}"></option>
+           </select><br>
+    <input type="submit" value="Add">
+    <button th:attr="onclick=|window.location.href='@{/viewRoomsByManager}'|">Back</button>
+</form>
+</body>
+</html>

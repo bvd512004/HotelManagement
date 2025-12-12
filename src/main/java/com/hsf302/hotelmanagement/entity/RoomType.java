@@ -40,6 +40,10 @@ public class RoomType {
         this.rooms = rooms;
     }
 
+    public RoomType(String typeName) {
+        this.typeName = typeName;
+    }
+
     public int getRoomTypeId() {
         return roomTypeId;
     }

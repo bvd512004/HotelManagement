@@ -43,6 +43,12 @@ public class Room {
         this.reservation_rooms = reservation_rooms;
     }
 
+    public Room(String roomName, RoomType roomType, Floor floor) {
+        this.roomName = roomName;
+        this.roomType = roomType;
+        this.floor = floor;
+    }
+
     public int getRoomId() {
         return roomId;
     }
