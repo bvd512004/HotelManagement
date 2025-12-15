@@ -642,7 +642,7 @@
                 <div th:each="floor : ${floorRooms.keySet()}" class="floor-section">
                     <h2 class="floor-title" th:if="${floor != null}">
                         <span class="floor-icon">🏢</span>
-                        <span th:text="${'Floor ' + floor.floor_number}"></span>
+                        <span th:text="${'Floor ' + floor.floorNumber}"></span>
                     </h2>
                     <h2 class="floor-title" th:if="${floor == null}">
                         <span class="floor-icon">🏢</span>
@@ -676,7 +676,7 @@
 
                                 <div class="room-info">
                                     <span class="room-info-label">Floor</span>
-                                    <span class="room-info-value" th:text="${floor != null ? 'Floor ' + floor.floor_number : 'N/A'}"></span>
+                                    <span class="room-info-value" th:text="${floor != null ? 'Floor ' + floor.floorNumber : 'N/A'}"></span>
                                 </div>
 
                                 <div class="room-description" th:if="${room.roomType.description != null}">

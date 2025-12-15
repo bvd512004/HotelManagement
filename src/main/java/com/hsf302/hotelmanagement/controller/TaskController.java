@@ -69,7 +69,7 @@ public class TaskController {
                         // Lấy phòng đầu tiên để hiển thị
                         Room firstRoom = task.getRooms().iterator().next();
                         map.put("roomName", firstRoom.getRoomName());
-                        map.put("floor", firstRoom.getFloor() != null ? firstRoom.getFloor().getFloor_number() : "N/A");
+                        map.put("floor", firstRoom.getFloor() != null ? firstRoom.getFloor().getFloorNumber() : "N/A");
                         map.put("roomType", firstRoom.getRoomType() != null ? firstRoom.getRoomType().getTypeName() : "N/A");
 
                         // Thêm danh sách tất cả phòng

@@ -22,7 +22,7 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
-    @GetMapping
+    @GetMapping("/list")
     public String listRooms(Model model) {
         List<Room> rooms = roomService.findAll();
 
@@ -98,12 +98,7 @@ public class RoomController {
         }
 
         roomService.save(room);
-        return "redirect:/rooms";
+        return "redirect:/rooms/list";
     }
 
-    @PostMapping("/delete/{id}")
-    public String deleteRoom(@PathVariable("id") int id) {
-        roomService.delete(id);
-        return "redirect:/rooms";
-    }
 }

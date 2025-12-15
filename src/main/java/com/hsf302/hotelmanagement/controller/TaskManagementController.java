@@ -66,7 +66,7 @@ public class TaskManagementController {
                     Map<String, Object> map = new HashMap<>();
                     map.put("roomId", room.getRoomId());
                     map.put("roomName", room.getRoomName());
-                    map.put("floor", room.getFloor() != null ? room.getFloor().getFloor_number() : "N/A");
+                    map.put("floor", room.getFloor() != null ? room.getFloor().getFloorNumber() : "N/A");
                     map.put("roomType", room.getRoomType() != null ? room.getRoomType().getTypeName() : "N/A");
                     return map;
                 })
