@@ -45,6 +45,11 @@ public class Reservation_Service {
         this.reservation_serviceId = reservation_serviceId;
     }
 
+    @Transient
+    public int getId() {
+        return reservation_serviceId;
+    }
+
     public Reservation getReservation() {
         return reservation;
     }

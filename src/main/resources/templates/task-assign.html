@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao Task Vệ Sinh Phòng</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 0;
+        }
+
+        .breadcrumb {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .rooms-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .room-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .room-item:hover {
+            background: #e8f4f8;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .room-item.selected {
+            background: #e3f2fd;
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .room-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .room-content {
+            flex: 1;
+        }
+
+        .room-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .room-info {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            gap: 15px;
+        }
+
+        .staff-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .staff-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .staff-item:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .staff-item.selected {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+        }
+
+        .staff-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .staff-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .summary {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .priority-group {
+            margin-bottom: 20px;
+        }
+
+        .priority-group label {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .priority-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .priority-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .priority-btn:hover {
+            border-color: #667eea;
+        }
+
+        .priority-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .deadline-group {
+            margin-bottom: 20px;
+        }
+
+        .deadline-group label {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .deadline-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .deadline-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reset {
+            background: #f5f5f5;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .btn-reset:hover {
+            background: #efefef;
+            border-color: #999;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .priority-options {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🧹 Giao Task Vệ Sinh Phòng</h1>
+                <div class="breadcrumb">Quản lý công việc vệ sinh cho housekeeping staff</div>
+            </div>
+        </div>
+
+        <div class="content">
+                <!-- Danh sách phòng bẩn -->
+                <div class="card">
+                    <div class="card-title">📍 Phòng Cần Vệ Sinh (Dirty) - Chọn Nhiều</div>
+                    <div id="roomsContainer" class="rooms-list">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Đang tải danh sách phòng...</p>
+                        </div>
+                    </div>
+                    <div id="emptyRooms" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">✨</div>
+                        <p>Không có phòng nào cần vệ sinh</p>
+                    </div>
+                </div>
+
+            <!-- Housekeeping staff -->
+            <div class="card">
+                <div class="card-title">👤 Chọn Housekeeping Staff</div>
+                <div id="staffContainer" class="staff-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Đang tải danh sách nhân viên...</p>
+                    </div>
+                </div>
+                <div id="emptyStaff" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">😞</div>
+                    <p>Không có housekeeping staff nào</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tóm tắt và cấu hình -->
+        <div class="summary">
+            <div class="card-title">⚙️ Cấu Hình Task</div>
+
+            <div id="selectionAlert" class="alert alert-warning" style="display: none;">
+                ⚠️ Vui lòng chọn phòng và nhân viên để tiếp tục
+            </div>
+
+            <div id="successAlert" class="alert alert-success" style="display: none;">
+                ✓ Task đã được tạo thành công!
+            </div>
+
+            <div id="errorAlert" class="alert alert-error" style="display: none;"></div>
+
+            <!-- Priority -->
+            <div class="priority-group">
+                <label>Độ Ưu Tiên</label>
+                <div class="priority-options">
+                    <button class="priority-btn" data-priority="Low">🟢 Thấp</button>
+                    <button class="priority-btn selected" data-priority="Normal">🟡 Bình Thường</button>
+                    <button class="priority-btn" data-priority="High">🔴 Cao</button>
+                </div>
+            </div>
+
+            <!-- Deadline -->
+            <div class="deadline-group">
+                <label>Hạn Chót (Tùy Chọn)</label>
+                <input type="datetime-local" id="deadline" placeholder="Chọn hạn chót">
+            </div>
+
+            <!-- Tóm tắt lựa chọn -->
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div class="summary-item">
+                    <div class="summary-label">Phòng Được Chọn</div>
+                    <div class="summary-value" id="selectedRoom">Chưa chọn</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Nhân Viên Được Chọn</div>
+                    <div class="summary-value" id="selectedStaff">Chưa chọn</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Độ Ưu Tiên</div>
+                    <div class="summary-value" id="selectedPriority">🟡 Bình Thường</div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-reset" onclick="resetForm()">↻ Đặt Lại</button>
+                <button class="btn btn-submit" id="submitBtn" onclick="submitTask()" disabled>✓ Giao Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedRooms = new Map(); // Map để lưu nhiều phòng: roomId => roomData
+        let selectedStaff = null;
+        let selectedPriority = "Normal";
+
+        // Load danh sách phòng bẩn
+        function loadDirtyRooms() {
+            fetch('/tasks-management/api/dirty-rooms')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('roomsContainer');
+                    const emptyState = document.getElementById('emptyRooms');
+
+                    if (data.length === 0) {
+                        container.innerHTML = '';
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    emptyState.style.display = 'none';
+
+                    data.forEach(room => {
+                        const div = document.createElement('div');
+                        div.className = 'room-item';
+                        div.id = `room-${room.roomId}`;
+                        div.innerHTML = `
+                            <input type="checkbox" class="room-checkbox" id="chk_room_${room.roomId}"
+                                   onchange="toggleRoom(${room.roomId}, this)">
+                            <div class="room-content">
+                                <div class="room-name">${room.roomName}</div>
+                                <div class="room-info">
+                                    <span>🏢 Tầng ${room.floor}</span>
+                                    <span>🏠 ${room.roomType}</span>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                })
+                .catch(err => {
+                    console.error('Error loading rooms:', err);
+                    document.getElementById('roomsContainer').innerHTML = '<div class="empty-state"><p>❌ Lỗi khi tải danh sách phòng</p></div>';
+                });
+        }
+
+        // Toggle select/unselect phòng
+        function toggleRoom(roomId, checkbox) {
+            const roomElement = document.getElementById(`room-${roomId}`);
+
+            if (checkbox.checked) {
+                // Thêm vào danh sách
+                const roomName = roomElement.querySelector('.room-name').textContent;
+                selectedRooms.set(roomId, {
+                    roomId: roomId,
+                    roomName: roomName
+                });
+                roomElement.classList.add('selected');
+            } else {
+                // Xóa khỏi danh sách
+                selectedRooms.delete(roomId);
+                roomElement.classList.remove('selected');
+            }
+
+            updateSelectedRoomsSummary();
+            updateSubmitButton();
+        }
+
+        // Cập nhật tóm tắt phòng được chọn
+        function updateSelectedRoomsSummary() {
+            const summaryDiv = document.getElementById('selectedRoom');
+            if (selectedRooms.size === 0) {
+                summaryDiv.textContent = 'Chưa chọn';
+            } else {
+                const roomNames = Array.from(selectedRooms.values())
+                    .map(r => r.roomName)
+                    .join(', ');
+                summaryDiv.textContent = `${selectedRooms.size} phòng: ${roomNames}`;
+            }
+        }
+
+        // Load danh sách housekeeping staff
+        function loadHousekeepingStaff() {
+            fetch('/tasks-management/api/housekeeping-staff')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('staffContainer');
+                    const emptyState = document.getElementById('emptyStaff');
+
+                    if (data.length === 0) {
+                        container.innerHTML = '';
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    emptyState.style.display = 'none';
+
+                    data.forEach(staff => {
+                        const div = document.createElement('div');
+                        div.className = 'staff-item';
+                        const initials = staff.fullName.split(' ').map(n => n.charAt(0)).join('');
+                        div.innerHTML = `
+                            <div class="staff-avatar">${initials}</div>
+                            <div class="staff-name">${staff.fullName}</div>
+                        `;
+                        div.onclick = () => selectStaff(staff, div);
+                        container.appendChild(div);
+                    });
+                })
+                .catch(err => {
+                    console.error('Error loading staff:', err);
+                    document.getElementById('staffContainer').innerHTML = '<div class="empty-state"><p>❌ Lỗi khi tải danh sách nhân viên</p></div>';
+                });
+        }
+
+        // Select staff
+        function selectStaff(staff, element) {
+            document.querySelectorAll('.staff-item').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedStaff = staff;
+            document.getElementById('selectedStaff').textContent = staff.fullName;
+            updateSubmitButton();
+        }
+
+        // Priority buttons
+        document.querySelectorAll('.priority-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPriority = this.dataset.priority;
+                document.getElementById('selectedPriority').textContent = this.textContent;
+            });
+        });
+
+        // Update submit button state
+        function updateSubmitButton() {
+            const btn = document.getElementById('submitBtn');
+            if (selectedRooms.size > 0 && selectedStaff) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        // Submit task
+        function submitTask() {
+            if (selectedRooms.size === 0 || !selectedStaff) {
+                document.getElementById('selectionAlert').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('selectionAlert').style.display = 'none';
+            document.getElementById('errorAlert').style.display = 'none';
+
+            const deadline = document.getElementById('deadline').value;
+
+            // Tạo dữ liệu gửi: nhiều roomId
+            const roomIds = Array.from(selectedRooms.keys());
+            const params = new URLSearchParams();
+            roomIds.forEach(id => params.append('roomIds', id));
+            params.append('userId', selectedStaff.userId);
+            params.append('priority', selectedPriority);
+            if (deadline) {
+                params.append('deadline', deadline);
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Đang xử lý...';
+
+            fetch('/tasks-management/api/create-task', {
+                method: 'POST',
+                body: params
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('successAlert').style.display = 'block';
+                    setTimeout(() => {
+                        resetForm();
+                        loadDirtyRooms();
+                        document.getElementById('successAlert').style.display = 'none';
+                    }, 2000);
+                } else {
+                    document.getElementById('errorAlert').textContent = '❌ ' + data.message;
+                    document.getElementById('errorAlert').style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = '✓ Giao Task';
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                document.getElementById('errorAlert').textContent = '❌ Lỗi khi giao task';
+                document.getElementById('errorAlert').style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = '✓ Giao Task';
+            });
+        }
+
+        // Reset form
+        function resetForm() {
+            selectedRooms.clear();
+            selectedStaff = null;
+            selectedPriority = "Normal";
+            document.querySelectorAll('.room-item').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.staff-item').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelector('[data-priority="Normal"]').classList.add('selected');
+            document.getElementById('selectedRoom').textContent = 'Chưa chọn';
+            document.getElementById('selectedStaff').textContent = 'Chưa chọn';
+            document.getElementById('selectedPriority').textContent = '🟡 Bình Thường';
+            document.getElementById('deadline').value = '';
+            document.getElementById('submitBtn').disabled = true;
+            updateSubmitButton();
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            loadDirtyRooms();
+            loadHousekeepingStaff();
+        });
+    </script>
+</body>
+</html>
+
