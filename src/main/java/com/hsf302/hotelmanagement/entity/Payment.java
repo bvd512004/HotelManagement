@@ -54,11 +54,6 @@ public class Payment {
         this.paymentId = paymentId;
     }
 
-    @Transient
-    public int getId() {
-        return paymentId;
-    }
-
     public double getAmount() {
         return amount;
     }

@@ -12,7 +12,7 @@ import java.util.List;
 @Table(name="services")
 public class Service {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="ServiceId")
     private int serviceId;
 
@@ -66,6 +66,11 @@ public class Service {
 
     public void setServiceId(int serviceId) {
         this.serviceId = serviceId;
+    }
+
+    @Transient
+    public int getId() {
+        return serviceId;
     }
 
     public String getServiceName() {
