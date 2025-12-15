@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class BookingController {
@@ -38,20 +40,52 @@ public class BookingController {
             @RequestParam(required = false) String checkOutDate,
             @RequestParam(required = false, defaultValue = "1") int adults,
             @RequestParam(required = false, defaultValue = "0") int children,
-            @RequestParam(required = false) Integer roomTypeId,
-            @RequestParam(required = false) Integer floorId,
+            @RequestParam(required = false) String roomTypeId,
+            @RequestParam(required = false) String floorId,
             @RequestParam(required = false, defaultValue = "asc") String priceSort,
             @RequestParam(required = false, defaultValue = "0") int page,
             Model model) {
         
+        // Tự động set ngày mặc định: hôm nay và ngày mai
+        if (checkInDate == null || checkInDate.trim().isEmpty()) {
+            checkInDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        }
+        if (checkOutDate == null || checkOutDate.trim().isEmpty()) {
+            checkOutDate = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        }
+        
         List<RoomType> roomTypes = bookingService.getAllRoomTypes();
         List<Floor> floors = bookingService.getAllFloors();
 
-        Integer resolvedRoomTypeId = roomTypeId != null ? roomTypeId : bookingService.pickDefaultRoomTypeId(roomTypes);
-        Integer resolvedFloorId = floorId != null ? floorId : bookingService.pickDefaultFloorId(floors);
+        // Xử lý roomTypeId và floorId: null hoặc empty string đều được coi là "tất cả"
+        Integer resolvedRoomTypeId = null;
+        if (roomTypeId != null && !roomTypeId.trim().isEmpty()) {
+            try {
+                int id = Integer.parseInt(roomTypeId.trim());
+                if (id > 0) {
+                    resolvedRoomTypeId = id;
+                }
+            } catch (NumberFormatException e) {
+                // Giữ null nếu không parse được
+            }
+        }
+        
+        Integer resolvedFloorId = null;
+        if (floorId != null && !floorId.trim().isEmpty()) {
+            try {
+                int id = Integer.parseInt(floorId.trim());
+                if (id > 0) {
+                    resolvedFloorId = id;
+                }
+            } catch (NumberFormatException e) {
+                // Giữ null nếu không parse được
+            }
+        }
+        
         String resolvedPriceSort = (priceSort == null || priceSort.trim().isEmpty()) ? "asc" : priceSort;
 
-        Page<Room> roomsPage = bookingService.getAvailableRooms(resolvedRoomTypeId, resolvedFloorId, resolvedPriceSort, page, 5);
+        Page<Room> roomsPage = bookingService.getAvailableRooms(
+            resolvedRoomTypeId, resolvedFloorId, checkInDate, checkOutDate, resolvedPriceSort, page, 5);
 
         model.addAttribute("roomTypes", roomTypes);
         model.addAttribute("floors", floors);
@@ -59,6 +93,9 @@ public class BookingController {
         model.addAttribute("rooms", roomsPage.getContent());
         model.addAttribute("selectedRoomTypeId", resolvedRoomTypeId);
         model.addAttribute("selectedFloorId", resolvedFloorId);
+        // Thêm option "Tất cả" cho roomType và floor
+        model.addAttribute("showAllRoomTypes", resolvedRoomTypeId == null);
+        model.addAttribute("showAllFloors", resolvedFloorId == null);
         model.addAttribute("priceSort", resolvedPriceSort);
         model.addAttribute("currentPage", roomsPage.getNumber());
         model.addAttribute("totalPages", roomsPage.getTotalPages());
@@ -73,6 +110,7 @@ public class BookingController {
     @GetMapping("/booking-details")
     public String bookingDetails(
             @RequestParam int roomTypeId,
+            @RequestParam(required = false) Integer roomId,
             @RequestParam int quantity,
             @RequestParam(required = false) String checkInDate,
             @RequestParam(required = false) String checkOutDate,
@@ -96,7 +134,18 @@ public class BookingController {
             long days = bookingService.calculateDays(checkInDate, checkOutDate);
             double totalPrice = roomType.getBasePrice() * quantity * days;
             
+            // Lấy thông tin phòng nếu có roomId
+            String roomName = null;
+            if (roomId != null && roomId > 0) {
+                Room room = bookingService.getRoomById(roomId);
+                if (room != null) {
+                    roomName = room.getRoomName();
+                }
+            }
+            
             model.addAttribute("roomType", roomType);
+            model.addAttribute("roomId", roomId);
+            model.addAttribute("roomName", roomName);
             model.addAttribute("quantity", quantity);
             model.addAttribute("checkInDate", checkInDate);
             model.addAttribute("checkOutDate", checkOutDate);
@@ -116,6 +165,7 @@ public class BookingController {
     @PostMapping("/booking/complete")
     public String completeBooking(
             @RequestParam int roomTypeId,
+            @RequestParam int roomNumber,
             @RequestParam int quantity,
             @RequestParam(required = false) String checkInDate,
             @RequestParam(required = false) String checkOutDate,
@@ -130,17 +180,20 @@ public class BookingController {
         try {
             GuestResult guestResult = guestService.findOrCreateGuest(fullName, phoneNumber, email);
             BookingResult bookingResult = bookingService.createBooking(
-                    roomTypeId, quantity, checkInDate, checkOutDate, adults, children, notes, guestResult.getGuest()
+                    roomTypeId, roomNumber, quantity, checkInDate, checkOutDate, adults, children, notes, guestResult.getGuest()
             );
 
             if (guestResult.hasRealEmail()) {
                 try {
+                    // Lấy danh sách số phòng từ booking result
+                    String roomNumbers = bookingResult.getRoomNumbers();
                     emailService.sendBookingConfirmationEmail(
                             guestResult.getEmailUsed(),
                             guestResult.getDisplayName(),
                             bookingResult.getReservation().getReservationId(),
                             bookingResult.getRoomType().getTypeName(),
                             quantity,
+                            roomNumbers,
                             checkInDate,
                             checkOutDate,
                             bookingResult.getTotalAmount()
@@ -156,14 +209,18 @@ public class BookingController {
 
         } catch (BookingException be) {
             redirectAttributes.addFlashAttribute("error", be.getMessage());
-            return "redirect:/booking-details?roomTypeId=" + roomTypeId + "&quantity=" + quantity +
-                    "&checkInDate=" + (checkInDate != null ? checkInDate : "") +
-                    "&checkOutDate=" + (checkOutDate != null ? checkOutDate : "") +
-                    "&adults=" + adults + "&children=" + children;
+            return "redirect:/booking-details?roomTypeId=" + roomTypeId + 
+                   "&roomId=" + roomNumber +
+                   "&quantity=" + quantity +
+                   "&checkInDate=" + (checkInDate != null ? checkInDate : "") +
+                   "&checkOutDate=" + (checkOutDate != null ? checkOutDate : "") +
+                   "&adults=" + adults + "&children=" + children;
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại.");
-            return "redirect:/booking-details?roomTypeId=" + roomTypeId + "&quantity=" + quantity + 
+            return "redirect:/booking-details?roomTypeId=" + roomTypeId + 
+                   "&roomId=" + roomNumber +
+                   "&quantity=" + quantity + 
                    "&checkInDate=" + checkInDate + "&checkOutDate=" + checkOutDate + 
                    "&adults=" + adults + "&children=" + children;
         }

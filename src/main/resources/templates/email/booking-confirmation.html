@@ -109,6 +109,10 @@
                     <span class="info-label">Hạng phòng:</span>
                     <span class="info-value" th:text="${roomTypeName} + ' (' + ${quantity} + ' phòng)'">Standard (1 phòng)</span>
                 </div>
+                <div class="info-row" th:if="${roomNumbers != null and !roomNumbers.isEmpty()}">
+                    <span class="info-label">Số phòng:</span>
+                    <span class="info-value" style="color: #20b2aa; font-weight: bold;" th:text="${roomNumbers}">Phòng 101</span>
+                </div>
                 <div class="info-row">
                     <span class="info-label">Ngày nhận phòng:</span>
                     <span class="info-value" th:text="${checkInDate}">10/12/2025</span>

@@ -51,4 +51,23 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     Page<Room> findAvailableRoomsFiltered(@Param("roomTypeId") Integer roomTypeId,
                                           @Param("floorId") Integer floorId,
                                           Pageable pageable);
+
+    @Query("""
+        SELECT r FROM Room r
+        WHERE r.roomStatus.roomStatus = 'Available'
+          AND (:roomTypeId IS NULL OR r.roomType.roomTypeId = :roomTypeId)
+          AND (:floorId IS NULL OR r.floor.floorId = :floorId)
+          AND r.roomId NOT IN (
+              SELECT rr.room.roomId FROM Reservation_Room rr
+              JOIN rr.reservationId res
+              WHERE res.checkInDate < :checkOutDate
+                AND res.checkOutDate > :checkInDate
+                AND (res.status IS NULL OR res.status <> 'Cancelled')
+          )
+        """)
+    Page<Room> findAvailableRoomsFilteredByDate(@Param("roomTypeId") Integer roomTypeId,
+                                                 @Param("floorId") Integer floorId,
+                                                 @Param("checkInDate") Date checkInDate,
+                                                 @Param("checkOutDate") Date checkOutDate,
+                                                 Pageable pageable);
 }
