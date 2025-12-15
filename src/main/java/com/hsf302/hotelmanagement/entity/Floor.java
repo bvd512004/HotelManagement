@@ -15,8 +15,7 @@ public class Floor {
     @Column(name="Floor_Number")
     private int floor_number;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="FloorId")
+    @OneToMany(mappedBy = "floor")
     private List<Room> rooms;
 
     public Floor() {
@@ -33,6 +32,11 @@ public class Floor {
 
     public void setFloorId(int floorId) {
         this.floorId = floorId;
+    }
+
+    @Transient
+    public int getId() {
+        return floorId;
     }
 
     public int getFloor_number() {
