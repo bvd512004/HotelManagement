@@ -16,10 +16,10 @@ public class Service {
     @Column(name="ServiceId")
     private int serviceId;
 
-    @Column(name="ServiceName")
+    @Column(name="ServiceName",columnDefinition = "NVarchar")
     private String serviceName;
 
-    @Column(name="Description", length=500)
+    @Column(name="Description", length=500,columnDefinition = "NVarchar")
     private String description;
 
     @Column(name="Price")

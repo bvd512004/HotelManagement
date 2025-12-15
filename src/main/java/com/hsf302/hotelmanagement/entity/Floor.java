@@ -43,7 +43,7 @@ public class Floor {
         return floorNumber;
     }
 
-    public void setFloor_number(int floorNumber) {
+    public void setFloorNumber(int floorNumber) {
         this.floorNumber = floorNumber;
     }
 
@@ -59,7 +59,7 @@ public class Floor {
     public String toString() {
         return "Floor{" +
                 "floorId=" + floorId +
-                ", floor_number=" + floorNumber +
+                ", floorNumber=" + floorNumber +
                 ", rooms=" + rooms +
                 '}';
     }

@@ -12,7 +12,7 @@ public class RoomType {
     @Column(name="TypeName")
     private String typeName;
 
-    @Column(name="Description")
+    @Column(name="Description", columnDefinition = "Nvarchar(255)")
     private String description;
 
     @Column(name="BasePrice", nullable=false)

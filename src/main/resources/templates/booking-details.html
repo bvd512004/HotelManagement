@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin đặt phòng - Khách sạn chúng tôi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fb;
+        }
+
+        /* Header */
+        header {
+            background: #20b2aa;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .phone-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .phone-icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+            margin: 0;
+            padding: 0;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: opacity 0.3s;
+        }
+
+        .nav-menu a:hover {
+            opacity: 0.8;
+        }
+
+        .book-btn {
+            background: white;
+            color: #20b2aa;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        /* Main Layout */
+        .booking-details-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        /* Left Column */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-section,
+        .selected-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 0.8rem;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .selected-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: #20b2aa;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .selected-room-card {
+            background: #f5f7fb;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .room-card-content {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 1rem;
+        }
+
+        .room-card-image {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .room-card-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .room-card-details {
+            flex: 1;
+        }
+
+        .room-card-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .room-card-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #20b2aa;
+        }
+
+        /* Right Column */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .payment-section,
+        .summary-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .payment-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .payment-option.selected {
+            border-color: #20b2aa;
+            background: #e6f7f5;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+        .summary-row.total {
+            border-bottom: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #20b2aa;
+            margin-top: 1rem;
+        }
+
+        .complete-btn {
+            background: #20b2aa;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 1.5rem;
+        }
+
+        .complete-btn:hover {
+            background: #17a2b8;
+        }
+
+        .complete-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            color: #20b2aa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .selected-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .selected-price {
+            color: #20b2aa;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .booking-details-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="tel:+84389330198" class="phone-section">
+                <svg class="phone-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+                <span>+84389330198</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a th:href="@{/}">Khách sạn chúng tôi</a></li>
+                <li><a th:href="@{/gallery}">Lưu giữ khoảnh khắc</a></li>
+                <li><a th:href="@{/rooms}">Hạng phòng</a></li>
+            </ul>
+            <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="booking-details-container" style="padding-top: 2rem; padding-bottom: 100px;">
+        <!-- Left Column -->
+        <div class="left-column">
+            <!-- Contact Information -->
+            <div class="contact-section">
+                <h2 class="section-title">Thông tin liên hệ</h2>
+                <div th:if="${error}" style="background: #fee; color: #c33; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <span th:text="${error}"></span>
+                </div>
+                <form id="bookingForm" method="post" th:action="@{/booking/complete}">
+                    <input type="hidden" name="roomTypeId" th:value="${roomType.roomTypeId}">
+                    <input type="hidden" name="roomNumber" th:value="${roomId != null ? roomId : 0}">
+                    <input type="hidden" name="quantity" th:value="${quantity}">
+                    <input type="hidden" name="checkInDate" th:value="${checkInDate}">
+                    <input type="hidden" name="checkOutDate" th:value="${checkOutDate}">
+                    <input type="hidden" name="adults" th:value="${adults}">
+                    <input type="hidden" name="children" th:value="${children}">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Họ và tên *</label>
+                            <input type="text" name="fullName" placeholder="Tên của bạn" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại *</label>
+                            <input type="tel" name="phoneNumber" placeholder="Số điện thoại" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ Email</label>
+                            <input type="email" name="email" placeholder="example@gmail.com">
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Ghi chú</label>
+                        <textarea name="notes" placeholder="Nhập ghi chú cho đặt phòng (nếu có)"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Selected Room -->
+            <div class="selected-section">
+                <div class="selected-badge" th:text="${quantity}">1</div>
+                <h2 class="section-title">Bạn đã chọn</h2>
+                <div class="selected-room-card">
+                    <div class="room-card-content">
+                        <img th:src="@{/images/room-{id}.jpg(id=${roomType.roomTypeId})}" 
+                             src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop" 
+                             alt="Phòng" 
+                             class="room-card-image"
+                             onerror="this.src='https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop'">
+                        <div class="room-card-info">
+                            <div class="room-card-details">
+                                <div class="room-card-title">
+                                    <span th:text="${roomType.typeName}">Superior</span>
+                                    <span style="color: #20b2aa;" th:text="' ' + ${quantity} + ' phòng'"> 1 phòng</span>
+                                </div>
+                                <div th:if="${roomName != null}" style="margin-bottom: 0.5rem;">
+                                    <strong>Phòng:</strong> <span style="color: #20b2aa;" th:text="${roomName}">Phòng 101</span>
+                                </div>
+                                <div>👤 <span th:text="${adults} + ' người lớn, ' + ${children} + ' trẻ em'">1 người lớn, 1 trẻ em</span></div>
+                                <div>Nhận phòng: 14:00 <span th:text="${checkInDate}">10 Thg 12, 2025</span></div>
+                                <div>Trả phòng: 12:00 <span th:text="${checkOutDate}">11 Thg 12, 2025</span></div>
+                                <div>Thời gian lưu trú: <span th:text="${days} + ' Ngày'">1 Ngày</span></div>
+                            </div>
+                            <div class="room-card-price" th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')} + ' VNĐ'">1,800,000 VNĐ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <!-- Payment Method -->
+            <div class="payment-section">
+                <h2 class="section-title">Phương thức thanh toán</h2>
+                <div class="payment-option selected">
+                    <input type="radio" name="paymentMethod" value="payOnCheckIn" checked>
+                    <label>Thanh toán khi nhận phòng</label>
+                </div>
+            </div>
+
+            <!-- Payment Summary -->
+            <div class="summary-section">
+                <h2 class="section-title">Thông tin thanh toán</h2>
+                <div class="summary-row">
+                    <span>Tổng tiền phòng</span>
+                    <span th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')} + ' VNĐ'">1,800,000 VNĐ</span>
+                </div>
+                <div class="summary-row">
+                    <span>Thu khác</span>
+                    <span>0 VNĐ</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Tổng cộng</span>
+                    <span th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')} + ' VNĐ'">1,800,000 VNĐ</span>
+                </div>
+                <button type="submit" form="bookingForm" class="complete-btn">Hoàn tất đặt phòng</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+        <a th:href="@{/booking(checkInDate=${checkInDate}, checkOutDate=${checkOutDate}, adults=${adults}, children=${children})}" class="back-btn">← Chọn lại</a>
+        <div class="selected-info">
+            <span th:text="${adults} + ' người lớn, ' + ${children} + ' trẻ em, ' + ${quantity} + ' phòng, ' + 'từ ' + ${checkInDate} + ' đến ' + ${checkOutDate}">1 người lớn, 0 trẻ em, 1 phòng</span>
+            <span ></span>
+        </div>
+        <div>
+            <span>Đã chọn</span>
+            <span class="selected-price" th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')}">1,800,000</span>
+        </div>
+    </div>
+</body>
+</html>

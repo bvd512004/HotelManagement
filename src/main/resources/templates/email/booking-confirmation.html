@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đặt phòng</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #20b2aa 0%, #17a2b8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            margin: -30px -30px 30px -30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #20b2aa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .info-value {
+            color: #333;
+        }
+        .reservation-id {
+            font-size: 24px;
+            font-weight: bold;
+            color: #20b2aa;
+            text-align: center;
+            padding: 15px;
+            background: #e6f7f5;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .contact-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="success-icon">✓</div>
+            <h1>Đặt phòng thành công!</h1>
+        </div>
+
+        <div class="content">
+            <p>Xin chào <strong th:text="${guestName}">Khách hàng</strong>,</p>
+            <p>Cảm ơn bạn đã đặt phòng tại khách sạn chúng tôi. Đơn đặt phòng của bạn đã được xác nhận.</p>
+
+            <div class="reservation-id">
+                Mã đặt phòng: <span th:text="${reservationId}">12345</span>
+            </div>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #20b2aa;">Thông tin đặt phòng</h3>
+                <div class="info-row">
+                    <span class="info-label">Hạng phòng:</span>
+                    <span class="info-value" th:text="${roomTypeName} + ' (' + ${quantity} + ' phòng)'">Standard (1 phòng)</span>
+                </div>
+                <div class="info-row" th:if="${roomNumbers != null and !roomNumbers.isEmpty()}">
+                    <span class="info-label">Số phòng:</span>
+                    <span class="info-value" style="color: #20b2aa; font-weight: bold;" th:text="${roomNumbers}">Phòng 101</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ngày nhận phòng:</span>
+                    <span class="info-value" th:text="${checkInDate}">10/12/2025</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ngày trả phòng:</span>
+                    <span class="info-value" th:text="${checkOutDate}">11/12/2025</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tổng tiền:</span>
+                    <span class="info-value" style="color: #20b2aa; font-weight: bold;" 
+                          th:text="${#numbers.formatInteger(totalAmount, 0, 'COMMA')} + ' VNĐ'">1,800,000 VNĐ</span>
+                </div>
+            </div>
+
+            <div class="contact-info">
+                <p><strong>Liên hệ hỗ trợ:</strong></p>
+                <p>📞 Hotline: +84 389 330 198</p>
+                <p>📍 Địa chỉ: Thành phố Hà Nội</p>
+            </div>
+
+            <p style="margin-top: 20px;">
+                <strong>Lưu ý:</strong> Vui lòng giữ mã đặt phòng này để tra cứu và check-in tại khách sạn.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Trân trọng,<br><strong>Khách sạn chúng tôi</strong></p>
+            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                Email này được gửi tự động, vui lòng không trả lời email này.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

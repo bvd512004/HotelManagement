@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hạng phòng - Khách sạn chúng tôi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: #20b2aa;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .phone-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .phone-icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .phone-section:hover {
+            opacity: 0.9;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+            margin: 0;
+            padding: 0;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: opacity 0.3s;
+        }
+
+        .nav-menu a:hover {
+            opacity: 0.8;
+        }
+
+        .book-btn {
+            background: white;
+            color: #20b2aa;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .book-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Page Title */
+        .page-title {
+            background: linear-gradient(135deg, #20b2aa 0%, #17a2b8 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .page-title h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Rooms Section */
+        .rooms {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .rooms-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .room-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .room-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .room-content {
+            padding: 1.5rem;
+        }
+
+        .room-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .room-price {
+            font-size: 1.8rem;
+            color: #20b2aa;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .room-price span {
+            font-size: 1rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .room-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .room-features {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .room-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .room-feature-icon {
+            width: 20px;
+            height: 20px;
+            fill: #20b2aa;
+        }
+
+        .room-btn {
+            background: #20b2aa;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .room-btn:hover {
+            background: #17a2b8;
+        }
+
+        .no-rooms {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section {
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #ecf0f1;
+            text-decoration: none;
+            margin: 0.5rem 0;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: #ff6b6b;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #34495e;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            color: #95a5a6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .phone-section {
+                order: 1;
+            }
+
+            .book-btn {
+                order: 2;
+            }
+
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .rooms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="tel:+84389330198" class="phone-section">
+                <svg class="phone-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+                <span>+84389330198</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a th:href="@{/}">Khách sạn chúng tôi</a></li>
+                <li><a th:href="@{/gallery}">Lưu giữ khoảnh khắc</a></li>
+                <li><a th:href="@{/rooms}">Hạng phòng</a></li>
+            </ul>
+            <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
+        </nav>
+    </header>
+
+    <!-- Page Title -->
+    <section class="page-title">
+        <h1>Hạng phòng</h1>
+        <p>Khám phá các loại phòng sang trọng của chúng tôi</p>
+    </section>
+
+    <!-- Rooms Section -->
+    <section class="rooms">
+        <div class="rooms-container">
+            <div class="rooms-grid" th:if="${roomTypes != null and !roomTypes.isEmpty()}">
+                <div class="room-card" th:each="roomType : ${roomTypes}">
+                    <img th:src="@{/images/room-{id}.jpg(id=${roomType.roomTypeId})}" 
+                         src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop" 
+                         alt="Phòng khách sạn" 
+                         class="room-image"
+                         onerror="this.src='https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop'">
+                    <div class="room-content">
+                        <h2 class="room-title" th:text="${roomType.typeName}">Tên phòng</h2>
+                        <div class="room-price">
+                            <span th:text="${#numbers.formatInteger(roomType.basePrice, 0, 'COMMA')}">0</span> VNĐ
+                            <span style="font-size: 0.9rem; color: #999;">/ đêm</span>
+                        </div>
+                        <p class="room-description" th:text="${roomType.description != null ? roomType.description : 'Phòng sang trọng với đầy đủ tiện nghi hiện đại'}">
+                            Mô tả phòng
+                        </p>
+                        <div class="room-features">
+                            <div class="room-feature">
+                                <svg class="room-feature-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17 7h-4v2h4c1.65 0 3 1.35 3 3s-1.35 3-3 3h-4v2h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-2zm-3-4h8v2H8z"/>
+                                </svg>
+                                <span th:text="${roomType.capacity} + ' người'">2 người</span>
+                            </div>
+                            <div class="room-feature">
+                                <svg class="room-feature-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <span>WiFi miễn phí</span>
+                            </div>
+                        </div>
+                        <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
+                    </div>
+                </div>
+            </div>
+            <div class="no-rooms" th:if="${roomTypes == null or roomTypes.isEmpty()}">
+                <h2>Chưa có hạng phòng nào</h2>
+                <p>Vui lòng quay lại sau.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Liên hệ với chúng tôi</h3>
+                <p><a href="tel:+84389330198">+84 389 330 198</a></p>
+                <p>Địa chỉ: Thành phố Hà Nội</p>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Khách sạn chúng tôi. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
