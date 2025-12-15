@@ -4,18 +4,23 @@ import com.hsf302.hotelmanagement.entity.Guest;
 import com.hsf302.hotelmanagement.entity.Reservation;
 import com.hsf302.hotelmanagement.entity.Reservation_Room;
 import com.hsf302.hotelmanagement.entity.Room;
+import com.hsf302.hotelmanagement.entity.Floor;
 import com.hsf302.hotelmanagement.entity.RoomType;
 import com.hsf302.hotelmanagement.exception.BookingException;
+import com.hsf302.hotelmanagement.repository.FloorRepository;
 import com.hsf302.hotelmanagement.repository.ReservationRepository;
 import com.hsf302.hotelmanagement.repository.ReservationRoomRepository;
 import com.hsf302.hotelmanagement.repository.RoomRepository;
 import com.hsf302.hotelmanagement.repository.RoomTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +39,9 @@ public class BookingService {
 
     @Autowired
     private ReservationRoomRepository reservationRoomRepository;
+
+    @Autowired
+    private FloorRepository floorRepository;
 
     public List<RoomType> getAllRoomTypes() {
         return roomTypeRepository.findAll();
@@ -57,6 +65,48 @@ public class BookingService {
         } catch (ParseException e) {
             return roomRepository.countByRoomTypeId(roomTypeId);
         }
+    }
+
+    public List<Floor> getAllFloors() {
+        return floorRepository.findAll(Sort.by("floorNumber"));
+    }
+
+    public Integer pickDefaultRoomTypeId(List<RoomType> roomTypes) {
+        if (roomTypes == null || roomTypes.isEmpty()) {
+            return null;
+        }
+        return roomTypes.stream()
+                .filter(rt -> rt.getTypeName() != null && rt.getTypeName().equalsIgnoreCase("standard"))
+                .map(RoomType::getRoomTypeId)
+                .findFirst()
+                .orElse(roomTypes.get(0).getRoomTypeId());
+    }
+
+    public Integer pickDefaultFloorId(List<Floor> floors) {
+        if (floors == null || floors.isEmpty()) {
+            return null;
+        }
+        return floors.stream()
+                .filter(f -> f.getFloorNumber() == 1)
+                .map(Floor::getFloorId)
+                .findFirst()
+                .orElse(floors.get(0).getFloorId());
+    }
+
+    public Page<Room> getAvailableRooms(Integer roomTypeId,
+                                        Integer floorId,
+                                        String priceSort,
+                                        int page,
+                                        int size) {
+        Sort sort = Sort.by("roomType.basePrice");
+        if ("desc".equalsIgnoreCase(priceSort)) {
+            sort = sort.descending();
+        } else {
+            sort = sort.ascending();
+        }
+
+        Pageable pageable = PageRequest.of(Math.max(page, 0), size, sort);
+        return roomRepository.findAvailableRoomsFiltered(roomTypeId, floorId, pageable);
     }
 
     public long calculateDays(String checkInDate, String checkOutDate) {

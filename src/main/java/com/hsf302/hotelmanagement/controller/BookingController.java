@@ -1,6 +1,8 @@
 package com.hsf302.hotelmanagement.controller;
 
 import com.hsf302.hotelmanagement.entity.RoomType;
+import com.hsf302.hotelmanagement.entity.Floor;
+import com.hsf302.hotelmanagement.entity.Room;
 import com.hsf302.hotelmanagement.service.EmailService;
 import com.hsf302.hotelmanagement.exception.BookingException;
 import com.hsf302.hotelmanagement.service.BookingResult;
@@ -8,6 +10,7 @@ import com.hsf302.hotelmanagement.service.BookingService;
 import com.hsf302.hotelmanagement.service.GuestService;
 import com.hsf302.hotelmanagement.service.GuestService.GuestResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 public class BookingController {
@@ -37,17 +38,30 @@ public class BookingController {
             @RequestParam(required = false) String checkOutDate,
             @RequestParam(required = false, defaultValue = "1") int adults,
             @RequestParam(required = false, defaultValue = "0") int children,
+            @RequestParam(required = false) Integer roomTypeId,
+            @RequestParam(required = false) Integer floorId,
+            @RequestParam(required = false, defaultValue = "asc") String priceSort,
+            @RequestParam(required = false, defaultValue = "0") int page,
             Model model) {
         
         List<RoomType> roomTypes = bookingService.getAllRoomTypes();
-        Map<Integer, Integer> availableRoomCounts = new HashMap<>();
-        for (RoomType roomType : roomTypes) {
-            int count = bookingService.getAvailableRoomCount(roomType.getRoomTypeId(), checkInDate, checkOutDate);
-            availableRoomCounts.put(roomType.getRoomTypeId(), count);
-        }
+        List<Floor> floors = bookingService.getAllFloors();
+
+        Integer resolvedRoomTypeId = roomTypeId != null ? roomTypeId : bookingService.pickDefaultRoomTypeId(roomTypes);
+        Integer resolvedFloorId = floorId != null ? floorId : bookingService.pickDefaultFloorId(floors);
+        String resolvedPriceSort = (priceSort == null || priceSort.trim().isEmpty()) ? "asc" : priceSort;
+
+        Page<Room> roomsPage = bookingService.getAvailableRooms(resolvedRoomTypeId, resolvedFloorId, resolvedPriceSort, page, 5);
 
         model.addAttribute("roomTypes", roomTypes);
-        model.addAttribute("availableRoomCounts", availableRoomCounts);
+        model.addAttribute("floors", floors);
+        model.addAttribute("roomsPage", roomsPage);
+        model.addAttribute("rooms", roomsPage.getContent());
+        model.addAttribute("selectedRoomTypeId", resolvedRoomTypeId);
+        model.addAttribute("selectedFloorId", resolvedFloorId);
+        model.addAttribute("priceSort", resolvedPriceSort);
+        model.addAttribute("currentPage", roomsPage.getNumber());
+        model.addAttribute("totalPages", roomsPage.getTotalPages());
         model.addAttribute("checkInDate", checkInDate);
         model.addAttribute("checkOutDate", checkOutDate);
         model.addAttribute("adults", adults);
