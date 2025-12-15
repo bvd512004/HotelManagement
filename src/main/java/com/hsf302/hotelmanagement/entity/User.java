@@ -12,7 +12,7 @@ public class User {
     @Column(name="UserId")
     private int userId;
 
-    @Column(name="UserName",  unique=true)
+    @Column(name="UserName",  unique=true,columnDefinition = "NVarchar")
     private String userName;
 
     @Column(name="Password")
