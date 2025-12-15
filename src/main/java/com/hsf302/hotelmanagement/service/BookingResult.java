@@ -40,5 +40,15 @@ public class BookingResult {
     public List<Reservation_Room> getReservationRooms() {
         return reservationRooms;
     }
+
+    public String getRoomNumbers() {
+        if (reservationRooms == null || reservationRooms.isEmpty()) {
+            return "";
+        }
+        return reservationRooms.stream()
+                .map(rr -> rr.getRoom().getRoomName())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+    }
 }
 
