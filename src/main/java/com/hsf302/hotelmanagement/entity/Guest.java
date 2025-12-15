@@ -28,10 +28,12 @@ public class Guest {
     @Column(name="Address")
     private String address;
 
-    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="GuestId")
     private List<Reservation> reservations;
 
-    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="GuestGuestId")
     private List<Payment> payments ;
 
     public Guest() {
@@ -107,11 +109,6 @@ public class Guest {
 
     public void setPayments(List<Payment> payments) {
         this.payments = payments;
-    }
-
-    @Transient
-    public int getId() {
-        return guestId;
     }
 
     @Override

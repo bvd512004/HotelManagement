@@ -14,42 +14,50 @@ public class Reservation_Room {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ReservationId")
-    private Reservation reservation;
+    private Reservation reservationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RoomId")
     private Room room;
 
     @Column(name = "Status", length = 50)
-    private String status;
+    private String Status;
 
     @Column(name = "Note")
-    private String note;
+    private String Note;
 
     public Reservation_Room() {
     }
 
-    public Reservation_Room(Reservation reservation, Room room, String status, String note) {
-        this.reservation = reservation;
+    public Reservation_Room(Reservation reservationId, Room room, String status, String note) {
+        this.reservationId = reservationId;
         this.room = room;
-        this.status = status;
-        this.note = note;
+        Status = status;
+        Note = note;
     }
 
-    public int getId() {
-        return id;
+    public String getNote() {
+        return Note;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setNote(String note) {
+        Note = note;
     }
 
-    public Reservation getReservation() {
-        return reservation;
+    public String getStatus() {
+        return Status;
     }
 
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
+    public void setStatus(String status) {
+        Status = status;
+    }
+
+    public Reservation getReservationId() {
+        return reservationId;
+    }
+
+    public void setReservationId(Reservation reservationId) {
+        this.reservationId = reservationId;
     }
 
     public Room getRoom() {
@@ -60,30 +68,22 @@ public class Reservation_Room {
         this.room = room;
     }
 
-    public String getStatus() {
-        return status;
+    public int getId() {
+        return id;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
     public String toString() {
         return "Reservation_Room{" +
                 "id=" + id +
-                ", reservation=" + reservation +
+                ", reservationId=" + reservationId +
                 ", room=" + room +
-                ", status='" + status + '\'' +
-                ", note='" + note + '\'' +
+                ", Status='" + Status + '\'' +
+                ", Note='" + Note + '\'' +
                 '}';
     }
 }
