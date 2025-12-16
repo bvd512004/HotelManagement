@@ -13,27 +13,25 @@ public class Guest {
     @Column(name="GuestId")
     private int guestId;
 
-    @Column(name="FirstName", columnDefinition = "NVARCHAR(50)")
+    @Column(name="FirstName",columnDefinition = "Nvarchar")
     private String firstName;
 
-    @Column(name="LastName", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name="LastName",columnDefinition = "Nvarchar")
     private String lastName;
 
-    @Column(name="Email", unique=true, nullable=false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(name="Email", unique=true, nullable=false)
     private String email;
 
-    @Column(name="PhoneNumber", length=20, nullable=false, columnDefinition = "NVARCHAR(20)")
+    @Column(name="PhoneNumber", length=10, nullable=false)
     private String phoneNumber;
 
-    @Column(name="Address", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name="Address",columnDefinition = "Nvarchar")
     private String address;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="GuestId")
+    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="GuestGuestId")
+    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
     private List<Payment> payments ;
 
     public Guest() {
@@ -111,9 +109,9 @@ public class Guest {
         this.payments = payments;
     }
 
-    // This method will be automatically used by Thymeleaf for "guest.fullName"
-    public String getFullName() {
-        return this.firstName + " " + this.lastName;
+    @Transient
+    public int getId() {
+        return guestId;
     }
 
     @Override
