@@ -34,9 +34,7 @@ public class RoomController {
     public String managerHome() {
         return "manager/homeManager";
     }
-
-    // --- Fragment Loading Endpoints (GET) ---
-
+    
     @GetMapping("/manager/rooms-fragment")
     public String getRoomsFragment(Model model) {
         List<Room> rList = roomService.findAllWithRelations();
@@ -64,7 +62,7 @@ public class RoomController {
         model.addAttribute("room", room);
         model.addAttribute("rtList", roomService.findAllRoomTypes());
         model.addAttribute("rto", room.getRoomType().getTypeName());
-        model.addAttribute("fno", room.getFloor().getFloor_number());
+//        model.addAttribute("fno", room.getFloor().getFloor_number());
         return "manager/editRoom :: edit-room-form";
     }
 
@@ -159,6 +157,13 @@ public class RoomController {
     @GetMapping("/viewRoomsByManager")
     public String viewRoomsByManager(Model model) {
         return getRoomsFragment(model);
+    }
+
+    @GetMapping
+    public String rooms(Model model) {
+        List<RoomType> roomTypes = roomTypeRepository.findAll();
+        model.addAttribute("roomTypes", roomTypes);
+        return "rooms";
     }
     @GetMapping("/list")
     public String listRooms(Model model) {
