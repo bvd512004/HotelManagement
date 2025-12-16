@@ -30,7 +30,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
           AND r.roomStatus.roomStatus = 'Available'
           AND r.roomId NOT IN (
               SELECT rr.room.roomId FROM Reservation_Room rr
-              JOIN rr.reservationId res
+              JOIN rr.reservation res
               WHERE res.checkInDate < :checkOutDate
                 AND res.checkOutDate > :checkInDate
                 AND (res.status IS NULL OR res.status <> 'Cancelled')
@@ -60,7 +60,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
           AND (:floorId IS NULL OR r.floor.floorId = :floorId)
           AND r.roomId NOT IN (
               SELECT rr.room.roomId FROM Reservation_Room rr
-              JOIN rr.reservationId res
+              JOIN rr.reservation res
               WHERE res.checkInDate < :checkOutDate
                 AND res.checkOutDate > :checkInDate
                 AND (res.status IS NULL OR res.status <> 'Cancelled')

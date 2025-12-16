@@ -114,6 +114,10 @@ public class Guest {
         return guestId;
     }
 
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
     @Override
     public String toString() {
         return "Guest{" +

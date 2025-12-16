@@ -181,7 +181,7 @@ public class BookingController {
         try {
             GuestResult guestResult = guestService.findOrCreateGuest(fullName, phoneNumber, email);
             BookingResult bookingResult = bookingService.createBooking(
-                    roomTypeId, quantity, checkInDate, checkOutDate, adults, children, notes, guestResult.getGuest()
+                    roomTypeId,roomNumber, quantity, checkInDate, checkOutDate, adults, children, notes, guestResult.getGuest()
             );
 
             if (guestResult.hasRealEmail()) {

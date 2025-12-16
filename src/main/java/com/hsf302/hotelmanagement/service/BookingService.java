@@ -171,12 +171,12 @@ public class BookingService {
                 throw new BookingException("Ngày trả phòng phải sau ngày nhận phòng.");
             }
 
-             RoomType roomType = getRoomTypeOrThrow(roomTypeId);
-             long days = calculateDays(checkInDate, checkOutDate);
-             double totalAmount = roomType.getBasePrice() * quantity * days;
+            RoomType roomType = getRoomTypeOrThrow(roomTypeId);
+            long days = calculateDays(checkInDate, checkOutDate);
+            double totalAmount = roomType.getBasePrice() * quantity * days;
 
-             List<Room> availableRooms = roomRepository.findAvailableRoomsByTypeAndDate(roomTypeId, checkIn, checkOut);
-            
+            List<Room> availableRooms = roomRepository.findAvailableRoomsByTypeAndDate(roomTypeId, checkIn, checkOut);
+
             // Nếu có roomId cụ thể, kiểm tra phòng đó có available không
             if (roomId > 0) {
                 Room selectedRoom = getRoomById(roomId);
@@ -189,12 +189,12 @@ public class BookingService {
                 }
                 // Kiểm tra phòng có available không
                 boolean isAvailable = availableRooms.stream()
-                    .anyMatch(r -> r.getRoomId() == roomId);
+                        .anyMatch(r -> r.getRoomId() == roomId);
                 if (!isAvailable) {
                     throw new BookingException("Phòng đã được đặt trong khoảng thời gian này.");
                 }
             }
-            
+
             if (availableRooms.size() < quantity) {
                 throw new BookingException("Không đủ phòng trống. Chỉ còn " + availableRooms.size() + " phòng.");
             }
@@ -209,20 +209,20 @@ public class BookingService {
             reservation = reservationRepository.save(reservation);
 
             List<Reservation_Room> reservationRooms = new ArrayList<>();
-            
+
             // Nếu có roomId cụ thể, đặt phòng đó trước
             if (roomId > 0) {
                 Room selectedRoom = getRoomById(roomId);
                 if (selectedRoom != null) {
                     Reservation_Room reservationRoom = new Reservation_Room();
-                    reservationRoom.setReservationId(reservation);
+                    reservationRoom.setReservation(reservation);
                     reservationRoom.setRoom(selectedRoom);
                     reservationRoom.setStatus("Reserved");
                     reservationRoom.setNote(notes);
                     reservationRooms.add(reservationRoom);
                 }
             }
-            
+
             // Đặt các phòng còn lại nếu quantity > 1
             int roomsToAdd = quantity - reservationRooms.size();
             for (int i = 0; i < roomsToAdd && i < availableRooms.size(); i++) {
@@ -232,7 +232,7 @@ public class BookingService {
                     continue;
                 }
                 Reservation_Room reservationRoom = new Reservation_Room();
-                reservationRoom.setReservationId(reservation);
+                reservationRoom.setReservation(reservation);
                 reservationRoom.setRoom(room);
                 reservationRoom.setStatus("Reserved");
                 reservationRoom.setNote(notes);
