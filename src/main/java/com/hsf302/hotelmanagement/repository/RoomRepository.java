@@ -19,6 +19,9 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r WHERE r.roomType.roomTypeId = :roomTypeId AND r.roomStatus.roomStatus = 'Available'")
     List<Room> findAvailableRoomsByType(@Param("roomTypeId") int roomTypeId);
 
+    // Tìm phòng theo trạng thái
+    List<Room> findByRoomStatus(Room_Status roomStatus);
+
     @Query("""
         SELECT r FROM Room r
         WHERE r.roomType.roomTypeId = :roomTypeId
@@ -34,8 +37,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     List<Room> findAvailableRoomsByTypeAndDate(@Param("roomTypeId") int roomTypeId,
                                                @Param("checkInDate") Date checkInDate,
                                                @Param("checkOutDate") Date checkOutDate);
-    
-    List<Room> findByRoomStatus(Room_Status roomStatus);
 
     @Query("SELECT count(r) FROM Room r WHERE r.roomType.roomTypeId = :roomTypeId")
     int countByRoomTypeId(@Param("roomTypeId") int roomTypeId);

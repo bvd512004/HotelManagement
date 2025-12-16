@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa Đơn Check-out</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background-color: #f5f5f5; padding: 20px; }
+        .invoice-container {
+            background: white;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            border: 2px solid #20b2aa;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #20b2aa;
+            padding-bottom: 20px;
+        }
+        .hotel-info h1 { color: #20b2aa; font-size: 2rem; margin-bottom: 5px; }
+        .hotel-info p { color: #666; font-size: 0.9rem; }
+        .invoice-number {
+            text-align: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .guest-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .info-section h3 { color: #20b2aa; margin-bottom: 10px; font-size: 0.95rem; text-transform: uppercase; }
+        .info-section p { margin: 5px 0; color: #333; font-size: 0.95rem; }
+        .info-section strong { color: #2c3e50; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        thead { background: #20b2aa; color: white; }
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+        tbody tr:nth-child(even) { background: #f9f9f9; }
+        tbody tr:hover { background: #f0f0f0; }
+
+        .summary-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-row.total {
+            background: #20b2aa;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #20b2aa;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #17a2b8;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .invoice-container { box-shadow: none; border: 1px solid #ddd; }
+            .action-buttons { display: none; }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="hotel-info">
+                <h1>🏨 KHÁCH SẠN</h1>
+                <p>Hotel Management System</p>
+                <p>Địa chỉ: 123 Đường ABC, TP HCM</p>
+                <p>Phone: (+84) 123 456 789</p>
+            </div>
+            <div class="invoice-number">
+                <div>HÓA ĐƠN CHECK-OUT</div>
+                <div style="color: #20b2aa; margin-top: 10px;" th:text="'DP' + ${reservation.reservationId}"></div>
+                <div style="font-size: 0.8rem; color: #666; margin-top: 10px;"
+                     th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></div>
+            </div>
+        </div>
+
+        <!-- Guest Information -->
+        <div class="guest-info">
+            <div class="info-section">
+                <h3>👤 Thông Tin Khách Hàng</h3>
+                <p><strong>Tên:</strong> <span th:text="${reservation.guest.fullName}"></span></p>
+                <p><strong>Email:</strong> <span th:text="${reservation.guest.email}"></span></p>
+                <p><strong>Phone:</strong> <span th:text="${reservation.guest.phoneNumber}"></span></p>
+            </div>
+            <div class="info-section">
+                <h3>🛏️ Thông Tin Phòng</h3>
+                <p th:if="${!reservation.reservation_rooms.isEmpty()}">
+                    <strong>Phòng:</strong> <span th:text="${reservation.reservation_rooms.get(0).room.roomName}"></span>
+                </p>
+                <p th:if="${!reservation.reservation_rooms.isEmpty()}">
+                    <strong>Hạng:</strong> <span th:text="${reservation.reservation_rooms.get(0).room.roomType.typeName}"></span>
+                </p>
+                <p><strong>Check-in:</strong> <span th:text="${#dates.format(reservation.checkInDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+                <p><strong>Check-out:</strong> <span th:text="${#dates.format(reservation.checkOutDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+            </div>
+        </div>
+
+        <!-- Services Table -->
+        <h3 style="color: #20b2aa; margin-bottom: 15px; font-size: 1rem; text-transform: uppercase;">📋 Chi Tiết Dịch Vụ</h3>
+
+        <!-- Rooms -->
+        <table th:if="${!reservation.reservation_rooms.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>Loại</th>
+                    <th>Phòng</th>
+                    <th style="text-align: right;">Số Đêm</th>
+                    <th style="text-align: right;">Giá/Đêm</th>
+                    <th style="text-align: right;">Thành Tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="resRoom : ${reservation.reservation_rooms}">
+                    <td th:text="${resRoom.room.roomType.typeName}"></td>
+                    <td th:text="${resRoom.room.roomName}"></td>
+                    <td style="text-align: right;" th:with="nights=${T(java.time.temporal.ChronoUnit).DAYS.between(reservation.checkInDate.toLocalDateTime().toLocalDate(), reservation.checkOutDate.toLocalDateTime().toLocalDate())}" th:text="${nights ?: 1}"></td>
+                    <td style="text-align: right;" th:text="${#numbers.formatInteger(resRoom.room.roomType.basePrice, 0, 'COMMA')} + '₫'"></td>
+                    <td style="text-align: right; font-weight: 600;" th:with="nights=${T(java.time.temporal.ChronoUnit).DAYS.between(reservation.checkInDate.toLocalDateTime().toLocalDate(), reservation.checkOutDate.toLocalDateTime().toLocalDate())}"
+                        th:text="${#numbers.formatInteger(resRoom.room.roomType.basePrice * (nights ?: 1), 0, 'COMMA')} + '₫'"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Services -->
+        <table th:if="${!reservation.reservation_services.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>Dịch Vụ</th>
+                    <th style="text-align: right;">Số Lượng</th>
+                    <th style="text-align: right;">Giá Tiền/Suất</th>
+                    <th style="text-align: right;">Thành Tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="resService : ${reservation.reservation_services}">
+                    <td th:text="${resService.service.serviceName}"></td>
+                    <td style="text-align: right;" th:text="${resService.quantity}"></td>
+                    <td style="text-align: right;" th:text="${#numbers.formatInteger(resService.service.price, 0, 'COMMA')} + '₫'"></td>
+                    <td style="text-align: right; font-weight: 600;"
+                        th:text="${#numbers.formatInteger(resService.service.price * resService.quantity, 0, 'COMMA')} + '₫'"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Summary -->
+        <div class="summary-section">
+            <div class="summary-row">
+                <span>Giá Phòng:</span>
+                <span id="roomTotal">0₫</span>
+            </div>
+            <div class="summary-row">
+                <span>Giá Dịch Vụ:</span>
+                <span id="serviceTotal">0₫</span>
+            </div>
+            <div class="summary-row total">
+                <span>TỔNG CỘNG:</span>
+                <span th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA')} + '₫'"></span>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="footer-note">
+            <p>✓ Cảm ơn bạn đã lưu trú tại khách sạn chúng tôi!</p>
+            <p>Vui lòng kiểm tra lại hóa đơn trước khi thanh toán.</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button onclick="window.print()" class="btn btn-primary">
+                🖨️ In Hóa Đơn
+            </button>
+            <a href="/receptionist/check-out" class="btn btn-secondary" style="text-decoration: none;">
+                ← Quay Lại
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

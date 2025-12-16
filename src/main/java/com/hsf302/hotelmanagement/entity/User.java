@@ -12,13 +12,13 @@ public class User {
     @Column(name="UserId")
     private int userId;
 
-    @Column(name="UserName",  unique=true)
+    @Column(name="UserName", unique=true, columnDefinition = "NVARCHAR(MAX)")
     private String userName;
 
-    @Column(name="Password")
+    @Column(name="Password", columnDefinition = "NVARCHAR(MAX)")
     private String password;
 
-    @Column(name="Role", nullable=false, length=20)
+    @Column(name="Role", nullable=false, length=20, columnDefinition = "NVARCHAR(20)")
     private String role;
 
     @OneToMany(cascade=CascadeType.ALL)

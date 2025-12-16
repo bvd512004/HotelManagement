@@ -16,22 +16,22 @@ public class Service {
     @Column(name="ServiceId")
     private int serviceId;
 
-    @Column(name="ServiceName")
+    @Column(name="ServiceName", columnDefinition = "NVARCHAR(MAX)")
     private String serviceName;
 
-    @Column(name="Description", length=500)
+    @Column(name="Description", length=500, columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Column(name="Price")
     private double price;
 
-    @Column(name="Unit", length=50)
+    @Column(name="Unit", length=50, columnDefinition = "NVARCHAR(50)")
     private String unit;
 
-    @Column(name="Category", length=50)
+    @Column(name="Category", length=50, columnDefinition = "NVARCHAR(50)")
     private String category;
 
-    @Column(name="Status", length=20)
+    @Column(name="Status", length=20, columnDefinition = "NVARCHAR(20)")
     private String status;
 
     @CreationTimestamp

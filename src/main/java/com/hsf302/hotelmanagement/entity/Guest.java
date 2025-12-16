@@ -13,19 +13,19 @@ public class Guest {
     @Column(name="GuestId")
     private int guestId;
 
-    @Column(name="FirstName")
+    @Column(name="FirstName", columnDefinition = "NVARCHAR(50)")
     private String firstName;
 
-    @Column(name="LastName")
+    @Column(name="LastName", columnDefinition = "NVARCHAR(MAX)")
     private String lastName;
 
-    @Column(name="Email", unique=true, nullable=false)
+    @Column(name="Email", unique=true, nullable=false, columnDefinition = "NVARCHAR(MAX)")
     private String email;
 
-    @Column(name="PhoneNumber", length=10, nullable=false)
+    @Column(name="PhoneNumber", length=20, nullable=false, columnDefinition = "NVARCHAR(20)")
     private String phoneNumber;
 
-    @Column(name="Address")
+    @Column(name="Address", columnDefinition = "NVARCHAR(MAX)")
     private String address;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -109,6 +109,11 @@ public class Guest {
 
     public void setPayments(List<Payment> payments) {
         this.payments = payments;
+    }
+
+    // This method will be automatically used by Thymeleaf for "guest.fullName"
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
     }
 
     @Override

@@ -1,10 +1,10 @@
 package com.hsf302.hotelmanagement.controller;
 
 import com.hsf302.hotelmanagement.entity.RoomType;
-import com.hsf302.hotelmanagement.service.EmailService;
 import com.hsf302.hotelmanagement.exception.BookingException;
 import com.hsf302.hotelmanagement.service.BookingResult;
 import com.hsf302.hotelmanagement.service.BookingService;
+import com.hsf302.hotelmanagement.service.EmailService;
 import com.hsf302.hotelmanagement.service.GuestService;
 import com.hsf302.hotelmanagement.service.GuestService.GuestResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,7 +157,6 @@ public class BookingController {
 
     @GetMapping("/booking/success")
     public String bookingSuccess(Model model) {
-        // Lấy thông tin từ flash attributes
         if (model.containsAttribute("reservationId")) {
             Integer reservationId = (Integer) model.getAttribute("reservationId");
             model.addAttribute("reservationId", reservationId);

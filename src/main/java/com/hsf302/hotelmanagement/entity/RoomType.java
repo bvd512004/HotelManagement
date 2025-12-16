@@ -13,10 +13,10 @@ public class RoomType {
     @Column(name="RoomTypeId")
     private int roomTypeId;
 
-    @Column(name="TypeName")
+    @Column(name="TypeName", columnDefinition = "NVARCHAR(MAX)")
     private String typeName;
 
-    @Column(name="Description", columnDefinition = "Nvarchar(255)")
+    @Column(name="Description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Column(name="BasePrice", nullable=false)

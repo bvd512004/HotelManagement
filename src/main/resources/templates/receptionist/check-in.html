@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách Check-in - Quản lý Khách sạn</title>
+    <style>
+        :root {
+            --primary-color: #20b2aa;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover-bg: #34495e;
+            --sidebar-active-bg: var(--primary-color);
+            --header-height: 60px;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 0px;
+            --transition-speed: 0.3s;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
+        .dashboard-container { display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: var(--header-height) 1fr auto; grid-template-areas: "header header" "sidebar content" "sidebar footer"; height: 100vh; transition: grid-template-columns var(--transition-speed) ease; }
+        .dashboard-container.sidebar-collapsed { grid-template-columns: var(--sidebar-collapsed-width) 1fr; }
+        .header { grid-area: header; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 0 20px; z-index: 10; }
+        .menu-icon { cursor: pointer; font-size: 24px; color: #333; margin-right: 20px; }
+        .header-title { font-size: 1.5rem; color: var(--primary-color); font-weight: 600; margin-right: auto; }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .sidebar { grid-area: sidebar; background-color: var(--sidebar-bg); color: var(--sidebar-text); padding-top: 10px; overflow: hidden; white-space: nowrap; transition: width var(--transition-speed) ease; }
+        .sidebar-header { display: flex; align-items: center; gap: 15px; padding: 10px 20px 20px 20px; }
+        .sidebar-header .menu-icon { color: var(--sidebar-text); }
+        .sidebar-title { font-size: 1.2rem; font-weight: 600; }
+        .sidebar-menu { list-style: none; margin: 0; padding: 0; }
+        .sidebar-menu li a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; color: var(--sidebar-text); text-decoration: none; transition: background-color var(--transition-speed); border-left: 4px solid transparent; }
+        .sidebar-menu li a:hover { background-color: var(--sidebar-hover-bg); }
+        .sidebar-menu li a.active { background-color: var(--sidebar-hover-bg); border-left-color: var(--primary-color); font-weight: bold; }
+        .main-content { grid-area: content; padding: 30px; overflow-y: auto; }
+        .footer { grid-area: footer; background-color: #ffffff; padding: 15px 30px; text-align: center; color: #888; border-top: 1px solid #e9ecef; }
+        h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1.5rem; color: #2c3e50; }
+        .content-card { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* Filter và Search */
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .date-range-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .date-input {
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            min-width: 140px;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+        }
+
+        .date-separator {
+            color: #999;
+            font-weight: bold;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+        }
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .search-input {
+            padding: 0.7rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-btn {
+            padding: 0.7rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .search-btn:hover {
+            background: #17a2b8;
+        }
+
+        /* Bảng danh sách */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            color: #495057;
+        }
+
+        tbody tr {
+            transition: all 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .stt {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .guest-info-cell {
+            min-width: 200px;
+        }
+
+        .guest-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .guest-phone {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .room-type-badge {
+            display: inline-block;
+            background: #c97c5c;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-occupied {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .price {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: #17a2b8;
+        }
+
+        .btn-success {
+            padding: 0.5rem 1rem;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.show {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-info-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-info-label {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .modal-info-value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            border-top: 1px solid #dee2e6;
+            padding-top: 1rem;
+        }
+
+        .btn-cancel {
+            padding: 0.7rem 1.5rem;
+            background: #e9ecef;
+            color: #495057;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #dee2e6;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .pagination a, .pagination form {
+            padding: 0.7rem 1.2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination select {
+            padding: 0.7rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination a:hover, .pagination select:hover {
+            background: #17a2b8;
+        }
+
+        .pagination span {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .pagination-disabled {
+            padding: 0.7rem 1.2rem;
+            color: #ccc;
+            cursor: not-allowed;
+            background: #f0f0f0;
+            border-radius: 6px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-text {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container" id="dashboard-container">
+        <header class="header">
+            <div class="menu-icon" id="header-menu-icon">☰</div>
+            <div class="header-title">Quản Lý Check-in</div>
+            <div class="user-profile">
+                <img src="https://i.pravatar.cc/150?u=receptionist" alt="User Avatar">
+                <span>Lễ tân</span>
+            </div>
+        </header>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="menu-icon" id="sidebar-menu-icon">☰</div>
+                <span class="sidebar-title">Menu</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/receptionist/check-in" class="active">📋 Check-in</a></li>
+                <li><a href="/receptionist/check-out">🚪 Check-out</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">
+                <h1>📋 Danh Sách Nhận Phòng</h1>
+
+                <!-- Alert Messages -->
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+                <!-- Tab Navigation -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 0;">
+                    <a href="/receptionist/check-in?tab=pending"
+                       th:classappend="${param.tab != 'checked' ? 'active' : ''}"
+                       style="padding: 1rem 1.5rem; font-weight: 600; color: #666; text-decoration: none; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.3s;"
+                       onmouseover="this.style.color='#20b2aa'"
+                       onmouseout="this.style.color='#666'">
+                        ⏳ Chưa Check-in
+                    </a>
+                    <a href="/receptionist/check-in?tab=checked"
+                       th:classappend="${param.tab == 'checked' ? 'active' : ''}"
+                       style="padding: 1rem 1.5rem; font-weight: 600; color: #666; text-decoration: none; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.3s;"
+                       onmouseover="this.style.color='#28a745'"
+                       onmouseout="this.style.color='#666'">
+                        ✓ Đã Check-in
+                    </a>
+                </div>
+
+                <!-- Filter Section -->
+                <form method="get" action="/receptionist/check-in">
+                    <input type="hidden" name="tab" th:value="${param.tab ?: 'pending'}">
+
+                    <div class="filter-section">
+                        <div class="filter-group" style="flex: 1; min-width: 250px;">
+                            <input type="text" name="search" class="search-input"
+                                   placeholder="🔍 Tìm kiếm tên, email khách hàng..."
+                                   th:value="${searchTerm}">
+                            <button type="submit" class="search-btn">Tìm</button>
+                        </div>
+
+                        <!-- Date Range Picker -->
+                        <div class="date-range-group">
+                            <span class="filter-label">Từ ngày:</span>
+                            <input type="date" name="fromDate" class="date-input" th:value="${fromDate}">
+
+                            <span class="date-separator">→</span>
+
+                            <span class="filter-label">Đến ngày:</span>
+                            <input type="date" name="toDate" class="date-input" th:value="${toDate}">
+
+                            <button type="submit" class="search-btn" style="padding: 0.6rem 1rem; margin-left: 5px;">Lọc</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filters -->
+                    <div class="filter-section" style="margin-bottom: 15px;">
+                        <button type="button" class="filter-btn" onclick="setDateRange('today', this.form)">Hôm nay</button>
+                        <button type="button" class="filter-btn" onclick="setDateRange('week', this.form)">1 Tuần</button>
+                        <button type="button" class="filter-btn" onclick="setDateRange('month', this.form)">1 Tháng</button>
+                        <button type="button" class="filter-btn" onclick="clearDateRange(this.form)">Xóa Bộ Lọc</button>
+                    </div>
+                </form>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(reservations)}" class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-text">Không có đặt phòng nào cần check-in</div>
+                </div>
+
+                <!-- Table -->
+                <div th:unless="${#lists.isEmpty(reservations)}" class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 4%;">STT</th>
+                                <th style="width: 22%;">Thông tin khách hàng</th>
+                                <th style="width: 12%;">Hạng phòng</th>
+                                <th style="width: 10%;">Giờ nhận</th>
+                                <th style="width: 10%;">Giờ trả</th>
+                                <th style="width: 8%;">Lưu trú</th>
+                                <th style="width: 12%;">Giá tiền/ngày</th>
+                                <th style="width: 12%;">Tổng cộng</th>
+                                <th style="width: 10%;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="reservation, iterStat : ${reservations}">
+                                <td class="stt" th:text="${(currentPage * pageSize) + iterStat.count}"></td>
+                                <td class="guest-info-cell">
+                                    <div class="guest-name" th:text="${reservation.guest.fullName}"></div>
+                                    <div class="guest-phone" th:text="${'☎️ ' + reservation.guest.phoneNumber}"></div>
+                                    <div class="guest-phone" th:text="${'📧 ' + reservation.guest.email}"></div>
+                                </td>
+                                <td>
+                                    <span class="room-type-badge"
+                                          th:text="${!reservation.reservation_rooms.isEmpty() ? reservation.reservation_rooms.get(0).room.roomType.typeName : 'N/A'}"></span>
+                                </td>
+                                <td th:text="${#dates.format(reservation.checkInDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td th:text="${#dates.format(reservation.checkOutDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                <!-- Cột Lưu trú (số ngày) - Safe null check -->
+                                <td class="price"
+                                    th:if="${reservation.checkInDate != null && reservation.checkOutDate != null}"
+                                    th:with="days=${(reservation.checkOutDate.time - reservation.checkInDate.time) / (1000 * 60 * 60 * 24)}"
+                                    th:text="${#numbers.formatInteger(days, 0, 'COMMA')} + ' ngày'">
+                                </td>
+                                <td class="price" th:unless="${reservation.checkInDate != null && reservation.checkOutDate != null}">N/A</td>
+
+                                <!-- Giá tiền/ngày = TotalAmount / số ngày -->
+                                <td class="price"
+                                    th:if="${reservation.checkInDate != null && reservation.checkOutDate != null}"
+                                    th:with="days=${(reservation.checkOutDate.time - reservation.checkInDate.time) / (1000 * 60 * 60 * 24)},
+                                            pricePerDay=${days > 0 ? reservation.totalAmount / days : reservation.totalAmount}"
+                                    th:text="${#numbers.formatInteger(pricePerDay, 0, 'COMMA') + '₫'}">
+                                </td>
+                                <td class="price" th:unless="${reservation.checkInDate != null && reservation.checkOutDate != null}">N/A</td>
+
+                                <!-- Tổng cộng -->
+                                <td class="price"
+                                    th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA') + '₫'}"></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <!-- Nếu status = Pending (Chưa Check-in) -->
+                                        <th:block th:if="${reservation.status == 'Pending'}">
+                                            <button type="button" class="btn-primary"
+                                                    th:onclick="'openCheckInModal(' + ${reservation.reservationId} + ')'">
+                                                🔑 Nhận
+                                            </button>
+                                            <a th:href="@{/receptionist/add-service(reservationId=${reservation.reservationId})}"
+                                               class="btn-primary">
+                                                ➕ DV
+                                            </a>
+                                        </th:block>
+
+                                        <!-- Nếu status = Confirmed (Đã Check-in) -->
+                                        <th:block th:if="${reservation.status == 'Confirmed'}">
+                                            <a href="/receptionist/occupied-rooms" class="btn-primary">
+                                                ✏️ Sửa ĐP
+                                            </a>
+                                        </th:block>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" th:if="${!#lists.isEmpty(reservations)}">
+                    <a th:if="${currentPage > 0}" th:href="@{/receptionist/check-in(page=${currentPage - 1}, size=${pageSize}, search=${searchTerm}, dateRange=${dateRange})}">← Trước</a>
+                    <span th:if="${currentPage == 0}" class="pagination-disabled">← Trước</span>
+
+                    <span>Trang <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span> | Tổng: <span th:text="${totalElements}"></span> bản ghi</span>
+
+                    <a th:if="${currentPage < totalPages - 1}" th:href="@{/receptionist/check-in(page=${currentPage + 1}, size=${pageSize}, search=${searchTerm}, dateRange=${dateRange})}">Sau →</a>
+                    <span th:if="${currentPage == totalPages - 1}" class="pagination-disabled">Sau →</span>
+
+                    <form method="get" action="/receptionist/check-in" style="display: inline; margin: 0;">
+                        <input type="hidden" name="search" th:value="${searchTerm}">
+                        <input type="hidden" name="dateRange" th:value="${dateRange}">
+                        <select name="size" onchange="this.form.submit();" style="padding: 0.7rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                            <option value="10" th:selected="${pageSize == 10}">10 bản ghi</option>
+                            <option value="15" th:selected="${pageSize == 15}">15 bản ghi</option>
+                            <option value="20" th:selected="${pageSize == 20}">20 bản ghi</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            © 2024 Hệ thống Quản Lý Khách Sạn. Bản quyền được bảo vệ.
+        </footer>
+    </div>
+
+    <!-- Modal Check-in -->
+    <div class="modal" id="checkInModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🔑 Xác Nhận Nhận Phòng</h2>
+                <button type="button" class="close-modal" onclick="closeCheckInModal()">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-info-row">
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">Hạng phòng</span>
+                        <span class="modal-info-value" id="modalRoomType">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">Số phòng</span>
+                        <span class="modal-info-value" id="modalRoomNumber">-</span>
+                    </div>
+                </div>
+
+                <div class="modal-info-row">
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">Tình trạng phòng</span>
+                        <span class="modal-info-value" id="modalRoomStatus">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">Khách hàng</span>
+                        <span class="modal-info-value" id="modalGuestName">-</span>
+                    </div>
+                </div>
+
+                <div class="modal-info-row">
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">Giờ nhận phòng</span>
+                        <span class="modal-info-value" id="modalCheckInTime">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">Giờ trả phòng</span>
+                        <span class="modal-info-value" id="modalCheckOutTime">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeCheckInModal()">❌ Hủy</button>
+                <form id="checkInForm" method="post" action="/receptionist/check-in" style="display: flex; gap: 0.5rem; margin: 0;">
+                    <input type="hidden" name="reservationId" id="modalReservationId">
+                    <input type="hidden" name="page" th:value="${currentPage}">
+                    <input type="hidden" name="size" th:value="${pageSize}">
+                    <input type="datetime-local" name="checkInDateTime" id="checkInDateTimeInput" required style="padding: 0.7rem; border: 1px solid #ddd; border-radius: 4px; margin-right: 0.5rem;">
+                    <button type="submit" class="btn-success">✓ Nhận Phòng</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar toggle
+        const headerMenuIcon = document.getElementById('header-menu-icon');
+        const sidebarMenuIcon = document.getElementById('sidebar-menu-icon');
+        const dashboardContainer = document.getElementById('dashboard-container');
+
+        const toggleSidebar = () => {
+            dashboardContainer.classList.toggle('sidebar-collapsed');
+        };
+
+        headerMenuIcon.addEventListener('click', toggleSidebar);
+        sidebarMenuIcon.addEventListener('click', toggleSidebar);
+
+        // Modal functions
+        function openCheckInModal(reservationId) {
+            // Hiện tại chỉ lấy từ HTML, trong thực tế cần gọi API để lấy thông tin chi tiết
+            const row = event.target.closest('tr');
+
+            document.getElementById('modalReservationId').value = reservationId;
+            document.getElementById('modalRoomType').textContent = row.querySelector('.room-type-badge').textContent;
+            document.getElementById('modalRoomNumber').textContent = 'Phòng ' + (reservationId % 20 + 1);
+            document.getElementById('modalRoomStatus').textContent = '🔴 Trống';
+            document.getElementById('modalGuestName').textContent = row.querySelector('.guest-name').textContent;
+            document.getElementById('modalCheckInTime').textContent = row.cells[3].textContent;
+            document.getElementById('modalCheckOutTime').textContent = row.cells[4].textContent;
+
+            // Thiết lập thời gian mặc định là bây giờ
+            const now = new Date();
+            const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('checkInDateTimeInput').value = localDateTime;
+
+            document.getElementById('checkInModal').classList.add('show');
+        }
+
+        function closeCheckInModal() {
+            document.getElementById('checkInModal').classList.remove('show');
+        }
+
+        // Đóng modal khi click bên ngoài
+        window.onclick = function(event) {
+            const modal = document.getElementById('checkInModal');
+            if (event.target == modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // Auto-hide alerts sau 5 giây
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        });
+
+        // ===== DATE RANGE FUNCTIONS =====
+        function setDateRange(range, formElement) {
+            const today = new Date();
+            const fromDateInput = formElement.querySelector('input[name="fromDate"]');
+            const toDateInput = formElement.querySelector('input[name="toDate"]');
+
+            let fromDate, toDate;
+
+            switch(range) {
+                case 'today':
+                    fromDate = new Date(today);
+                    toDate = new Date(today);
+                    break;
+                case 'week':
+                    fromDate = new Date(today);
+                    fromDate.setDate(today.getDate() - 7);
+                    toDate = new Date(today);
+                    break;
+                case 'month':
+                    fromDate = new Date(today);
+                    fromDate.setDate(today.getDate() - 30);
+                    toDate = new Date(today);
+                    break;
+            }
+
+            fromDateInput.value = formatDate(fromDate);
+            toDateInput.value = formatDate(toDate);
+            formElement.submit();
+        }
+
+        function clearDateRange(formElement) {
+            const fromDateInput = formElement.querySelector('input[name="fromDate"]');
+            const toDateInput = formElement.querySelector('input[name="toDate"]');
+            fromDateInput.value = '';
+            toDateInput.value = '';
+            formElement.submit();
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Style active tab
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentTab = new URLSearchParams(window.location.search).get('tab') || 'pending';
+            const tabs = document.querySelectorAll('a[href*="?tab="]');
+            tabs.forEach(tab => {
+                if (tab.href.includes('tab=' + currentTab)) {
+                    tab.style.color = currentTab === 'checked' ? '#28a745' : '#20b2aa';
+                    tab.style.borderBottomColor = currentTab === 'checked' ? '#28a745' : '#20b2aa';
+                    tab.style.borderBottomWidth = '3px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
