@@ -26,6 +26,10 @@ public class Room_Status {
         this.rooms = rooms;
     }
 
+    public Room_Status(String roomStatus){
+        this.roomStatus = roomStatus;
+    }
+
     public int getRoomStatusId() {
         return roomStatusId;
     }

@@ -26,6 +26,10 @@ public class Floor {
         this.rooms = rooms;
     }
 
+    public Floor(int floor_number) {
+        this.floor_number = floor_number;
+    }
+
     public int getFloorId() {
         return floorId;
     }

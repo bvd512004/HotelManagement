@@ -5,10 +5,9 @@ import com.hsf302.hotelmanagement.entity.Room_Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import java.util.Date;
 import java.util.List;
 
@@ -21,8 +20,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r WHERE r.roomType.roomTypeId = :roomTypeId AND r.roomStatus.roomStatus = 'Available'")
     List<Room> findAvailableRoomsByType(@Param("roomTypeId") int roomTypeId);
 
-    // Tìm phòng theo trạng thái
-    List<Room> findByRoomStatus(Room_Status roomStatus);
 
     @Query("""
         SELECT r FROM Room r
@@ -39,6 +36,12 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     List<Room> findAvailableRoomsByTypeAndDate(@Param("roomTypeId") int roomTypeId,
                                                @Param("checkInDate") Date checkInDate,
                                                @Param("checkOutDate") Date checkOutDate);
+    
+    List<Room> findByRoomStatus(Room_Status roomStatus);
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.roomStatus JOIN FETCH r.floor")
+    List<Room> findAllWithRelations();
+
 
     @Query("SELECT count(r) FROM Room r WHERE r.roomType.roomTypeId = :roomTypeId")
     int countByRoomTypeId(@Param("roomTypeId") int roomTypeId);
