@@ -1,10 +1,6 @@
 package com.hsf302.hotelmanagement.entity;
-
-
 import jakarta.persistence.*;
-
 import java.util.List;
-
 @Entity
 @Table(name="roomtypes")
 public class RoomType {
@@ -25,8 +21,7 @@ public class RoomType {
     @Column(name="Capacity")
     private int capacity;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="RoomTypeId")
+    @OneToMany(mappedBy = "roomType")
     private List<Room> rooms;
 
     public RoomType() {
@@ -46,6 +41,11 @@ public class RoomType {
 
     public void setRoomTypeId(int roomTypeId) {
         this.roomTypeId = roomTypeId;
+    }
+
+    @Transient
+    public int getId() {
+        return roomTypeId;
     }
 
     public String getTypeName() {

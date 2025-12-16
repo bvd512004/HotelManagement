@@ -356,6 +356,7 @@
                 </div>
                 <form id="bookingForm" method="post" th:action="@{/booking/complete}">
                     <input type="hidden" name="roomTypeId" th:value="${roomType.roomTypeId}">
+                    <input type="hidden" name="roomNumber" th:value="${roomId != null ? roomId : 0}">
                     <input type="hidden" name="quantity" th:value="${quantity}">
                     <input type="hidden" name="checkInDate" th:value="${checkInDate}">
                     <input type="hidden" name="checkOutDate" th:value="${checkOutDate}">
@@ -399,6 +400,9 @@
                                 <div class="room-card-title">
                                     <span th:text="${roomType.typeName}">Superior</span>
                                     <span style="color: #20b2aa;" th:text="' ' + ${quantity} + ' phòng'"> 1 phòng</span>
+                                </div>
+                                <div th:if="${roomName != null}" style="margin-bottom: 0.5rem;">
+                                    <strong>Phòng:</strong> <span style="color: #20b2aa;" th:text="${roomName}">Phòng 101</span>
                                 </div>
                                 <div>👤 <span th:text="${adults} + ' người lớn, ' + ${children} + ' trẻ em'">1 người lớn, 1 trẻ em</span></div>
                                 <div>Nhận phòng: 14:00 <span th:text="${checkInDate}">10 Thg 12, 2025</span></div>

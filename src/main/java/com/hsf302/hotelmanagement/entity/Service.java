@@ -12,26 +12,26 @@ import java.util.List;
 @Table(name="services")
 public class Service {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="ServiceId")
     private int serviceId;
 
-    @Column(name="ServiceName", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name="ServiceName",columnDefinition = "NVarchar")
     private String serviceName;
 
-    @Column(name="Description", length=500, columnDefinition = "NVARCHAR(MAX)")
+    @Column(name="Description", length=500,columnDefinition = "NVarchar")
     private String description;
 
     @Column(name="Price")
     private double price;
 
-    @Column(name="Unit", length=50, columnDefinition = "NVARCHAR(50)")
+    @Column(name="Unit", length=50)
     private String unit;
 
-    @Column(name="Category", length=50, columnDefinition = "NVARCHAR(50)")
+    @Column(name="Category", length=50)
     private String category;
 
-    @Column(name="Status", length=20, columnDefinition = "NVARCHAR(20)")
+    @Column(name="Status", length=20)
     private String status;
 
     @CreationTimestamp

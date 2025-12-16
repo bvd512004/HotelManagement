@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .action-form {
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>User Management</h1>
+        <!-- Search Form -->
+        <form th:action="@{/users}" method="get" class="form-inline mb-3">
+            <input type="text" name="name" class="form-control mr-2" placeholder="Search by name..." th:value="${searchName}" />
+            <select name="role" class="form-control mr-2">
+                <option value="">All Roles</option>
+                <option value="Admin" th:selected="${searchRole == 'Admin'}">Admin</option>
+                <option value="Receptionist" th:selected="${searchRole == 'Receptionist'}">Receptionist</option>
+                <option value="Housekeeping" th:selected="${searchRole == 'Housekeeping'}">Housekeeping</option>
+                <option value="Hotel Manager" th:selected="${searchRole == 'Hotel Manager'}">Hotel Manager</option>
+            </select>
+            <button type="submit" class="btn btn-info mr-2">Search</button>
+            <a href="/users/add" class="btn btn-primary">Add New User</a>
+        </form>
+
+        <!-- Display total items -->
+        <p>Total: <span th:text="${totalItems}"></span> users</p>
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Stt</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user,status : ${users}">
+                    <td th:text="${currentPage * 10 + status.count}"></td>
+                    <td th:text="${user.userName}"></td>
+                    <td th:text="${user.role}"></td>
+                    <td>
+                        <!-- Edit Button as a Form -->
+                        <form th:action="@{/users/edit/{id}(id=${user.userId})}" class="action-form">
+                            <button type="submit" class="btn btn-sm btn-info">Edit</button>
+                        </form>
+                        <form th:action="@{/users/delete/{id}(id=${user.userId})}" method="get" class="action-form">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination">
+                <!-- Previous button -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/users(name=${searchName}, role=${searchRole}, page=${currentPage - 1})}" th:if="${currentPage > 0}">Previous</a>
+                    <span class="page-link" th:if="${currentPage == 0}">Previous</span>
+                </li>
+
+                <!-- Page numbers -->
+                <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${pageNum == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/users(name=${searchName}, role=${searchRole}, page=${pageNum})}" th:text="${pageNum + 1}"></a>
+                </li>
+
+                <!-- Next button -->
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/users(name=${searchName}, role=${searchRole}, page=${currentPage + 1})}" th:if="${currentPage < totalPages - 1}">Next</a>
+                    <span class="page-link" th:if="${currentPage == totalPages - 1}">Next</span>
+                </li>
+            </ul>
+        </nav>
+    </div>
+<!--<div th:replace="dashboard-layout :: footer"></div>-->
+
+</body>
+</html>

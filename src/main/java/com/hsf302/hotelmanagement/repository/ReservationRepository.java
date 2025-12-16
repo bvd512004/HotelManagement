@@ -11,8 +11,12 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
+import java.util.List;
+
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
+    List<Reservation> findByGuestId(int guestId);
+
     List<Reservation> findByStatus(String status);
     Page<Reservation> findByStatus(String status, Pageable pageable);
 
