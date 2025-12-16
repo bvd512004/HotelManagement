@@ -7,6 +7,7 @@ import com.hsf302.hotelmanagement.service.EmailService;
 import com.hsf302.hotelmanagement.exception.BookingException;
 import com.hsf302.hotelmanagement.service.BookingResult;
 import com.hsf302.hotelmanagement.service.BookingService;
+import com.hsf302.hotelmanagement.service.EmailService;
 import com.hsf302.hotelmanagement.service.GuestService;
 import com.hsf302.hotelmanagement.service.GuestService.GuestResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class BookingController {
         if (checkOutDate == null || checkOutDate.trim().isEmpty()) {
             checkOutDate = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
         }
-        
+
         List<RoomType> roomTypes = bookingService.getAllRoomTypes();
         List<Floor> floors = bookingService.getAllFloors();
 
@@ -69,7 +70,7 @@ public class BookingController {
                 // Giữ null nếu không parse được
             }
         }
-        
+
         Integer resolvedFloorId = null;
         if (floorId != null && !floorId.trim().isEmpty()) {
             try {
@@ -81,7 +82,7 @@ public class BookingController {
                 // Giữ null nếu không parse được
             }
         }
-        
+
         String resolvedPriceSort = (priceSort == null || priceSort.trim().isEmpty()) ? "asc" : priceSort;
 
         Page<Room> roomsPage = bookingService.getAvailableRooms(
@@ -142,7 +143,7 @@ public class BookingController {
                     roomName = room.getRoomName();
                 }
             }
-            
+
             model.addAttribute("roomType", roomType);
             model.addAttribute("roomId", roomId);
             model.addAttribute("roomName", roomName);
@@ -180,7 +181,7 @@ public class BookingController {
         try {
             GuestResult guestResult = guestService.findOrCreateGuest(fullName, phoneNumber, email);
             BookingResult bookingResult = bookingService.createBooking(
-                    roomTypeId, roomNumber, quantity, checkInDate, checkOutDate, adults, children, notes, guestResult.getGuest()
+                    roomTypeId,roomNumber, quantity, checkInDate, checkOutDate, adults, children, notes, guestResult.getGuest()
             );
 
             if (guestResult.hasRealEmail()) {
@@ -209,7 +210,7 @@ public class BookingController {
 
         } catch (BookingException be) {
             redirectAttributes.addFlashAttribute("error", be.getMessage());
-            return "redirect:/booking-details?roomTypeId=" + roomTypeId + 
+            return "redirect:/booking-details?roomTypeId=" + roomTypeId +
                    "&roomId=" + roomNumber +
                    "&quantity=" + quantity +
                    "&checkInDate=" + (checkInDate != null ? checkInDate : "") +
@@ -218,9 +219,9 @@ public class BookingController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại.");
-            return "redirect:/booking-details?roomTypeId=" + roomTypeId + 
+            return "redirect:/booking-details?roomTypeId=" + roomTypeId +
                    "&roomId=" + roomNumber +
-                   "&quantity=" + quantity + 
+                   "&quantity=" + quantity +
                    "&checkInDate=" + checkInDate + "&checkOutDate=" + checkOutDate + 
                    "&adults=" + adults + "&children=" + children;
         }

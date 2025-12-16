@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm dịch vụ - Quản lý Khách sạn</title>
+    <style>
+        :root {
+            --primary-color: #20b2aa;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover-bg: #34495e;
+            --sidebar-active-bg: var(--primary-color);
+            --header-height: 60px;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 0px;
+            --transition-speed: 0.3s;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
+        .dashboard-container { display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: var(--header-height) 1fr auto; grid-template-areas: "header header" "sidebar content" "sidebar footer"; height: 100vh; transition: grid-template-columns var(--transition-speed) ease; }
+        .dashboard-container.sidebar-collapsed { grid-template-columns: var(--sidebar-collapsed-width) 1fr; }
+        .header { grid-area: header; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 0 20px; z-index: 10; }
+        .menu-icon { cursor: pointer; font-size: 24px; color: #333; margin-right: 20px; }
+        .header-title { font-size: 1.5rem; color: var(--primary-color); font-weight: 600; margin-right: auto; }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .sidebar { grid-area: sidebar; background-color: var(--sidebar-bg); color: var(--sidebar-text); padding-top: 10px; overflow: hidden; white-space: nowrap; transition: width var(--transition-speed) ease; }
+        .sidebar-header { display: flex; align-items: center; gap: 15px; padding: 10px 20px 20px 20px; }
+        .sidebar-header .menu-icon { color: var(--sidebar-text); }
+        .sidebar-title { font-size: 1.2rem; font-weight: 600; }
+        .sidebar-menu { list-style: none; margin: 0; padding: 0; }
+        .sidebar-menu li a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; color: var(--sidebar-text); text-decoration: none; transition: background-color var(--transition-speed); border-left: 4px solid transparent; }
+        .sidebar-menu li a:hover { background-color: var(--sidebar-hover-bg); }
+        .sidebar-menu li a.active { background-color: var(--sidebar-hover-bg); border-left-color: var(--primary-color); font-weight: bold; }
+        .main-content { grid-area: content; padding: 30px; overflow-y: auto; }
+        .footer { grid-area: footer; background-color: #ffffff; padding: 15px 30px; text-align: center; color: #888; border-top: 1px solid #e9ecef; }
+        h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1.5rem; color: #2c3e50; }
+        .content-card { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        .reservation-info {
+            background: #f0f8f7;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #20b2aa;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+        .info-value {
+            color: #20b2aa;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .summary-box {
+            background: white;
+            border: 2px solid #20b2aa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .summary-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #20b2aa;
+            margin-bottom: 1rem;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+        .summary-label {
+            color: #666;
+        }
+        .summary-value {
+            color: #333;
+            font-weight: 600;
+        }
+        .summary-total {
+            border-top: 2px solid #ddd;
+            padding-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #20b2aa;
+        }
+        .add-service-section {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #20b2aa;
+            border-bottom: 2px solid #20b2aa;
+            padding-bottom: 0.8rem;
+        }
+
+        /* ===== STYLE CHO CHỌN NHIỀU DỊCH VỤ ===== */
+        .services-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .service-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .service-card:hover {
+            border-color: #20b2aa;
+            box-shadow: 0 2px 8px rgba(32, 178, 170, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .service-card input[type="checkbox"] {
+            display: none;
+        }
+
+        .service-card input[type="checkbox"]:checked + .service-content {
+            background: #f0f8f7;
+            border-left: 4px solid #20b2aa;
+        }
+
+        .service-card input[type="checkbox"]:checked ~ .check-icon {
+            display: block;
+        }
+
+        .service-card label {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .service-content {
+            flex: 1;
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .service-price {
+            color: #20b2aa;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-description {
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        .check-icon {
+            display: none;
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #20b2aa;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 1.2rem;
+        }
+
+        .service-card {
+            position: relative;
+        }
+
+        /* ===== FORM NHẬP SỐ LƯỢNG ===== */
+        .selected-services-form {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .selected-service-item {
+            display: grid;
+            grid-template-columns: 1fr 120px 80px;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #20b2aa;
+        }
+
+        .service-name-display {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .service-price-display {
+            color: #20b2aa;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .quantity-input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 80px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .btn-remove-service {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .btn-remove-service:hover {
+            background: #c82333;
+        }
+
+        /* ===== NÚT HÀNH ĐỘNG ===== */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            border-top: 2px solid #ddd;
+            padding-top: 2rem;
+        }
+        .btn-back {
+            flex: 1;
+            background: white;
+            color: #20b2aa;
+            border: 2px solid #20b2aa;
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        .btn-back:hover {
+            background: #20b2aa;
+            color: white;
+        }
+        .btn-finish {
+            flex: 1;
+            background: #20b2aa;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        .btn-finish:hover {
+            background: #17a2b8;
+        }
+        .btn-finish:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            animation: slideDown 0.3s;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .services-list { grid-template-columns: 1fr; }
+            .selected-service-item { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container" id="dashboard-container">
+        <header class="header">
+            <div class="menu-icon" id="header-menu-icon">☰</div>
+            <div class="header-title">➕ Thêm Dịch Vụ</div>
+            <div class="user-profile">
+                <img src="https://i.pravatar.cc/150?u=receptionist" alt="User Avatar">
+                <span>Lễ tân</span>
+            </div>
+        </header>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="menu-icon" id="sidebar-menu-icon">☰</div>
+                <span class="sidebar-title">Menu</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/receptionist/check-in">📋 Check-in</a></li>
+                <li><a href="/receptionist/check-out">🚪 Check-out</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">
+                <h1>➕ Thêm Dịch Vụ Cho Khách Hàng</h1>
+
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+                <!-- Reservation Info -->
+                <div class="reservation-info" th:if="${reservation}">
+                    <h2 style="margin-top: 0; margin-bottom: 1rem; color: #20b2aa; font-size: 1.2rem;">📋 Thông Tin Đặt Phòng</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Mã đặt phòng</span>
+                            <span class="info-value" th:text="'DP' + ${reservation.reservationId}"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Khách hàng</span>
+                            <span class="info-value" th:text="${reservation.guest.fullName}"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Điện thoại</span>
+                            <span class="info-value" th:text="${reservation.guest.phoneNumber}"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Số khách</span>
+                            <span class="info-value" th:text="${reservation.numberOfGuests} + ' người'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Box -->
+                <div class="summary-box" th:if="${reservation}">
+                    <div class="summary-title">💰 Tóm Tắt Chi Phí</div>
+                    <div class="summary-row">
+                        <span class="summary-label">Giá phòng:</span>
+                        <span class="summary-value" id="roomPrice" th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA') + '₫'}"></span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Tổng dịch vụ:</span>
+                        <span class="summary-value" id="serviceSum">0₫</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span>Tổng cộng:</span>
+                        <span id="totalSum" th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA') + '₫'}"></span>
+                    </div>
+                </div>
+
+                <!-- Services Selection -->
+                <div class="add-service-section" th:if="${services != null && !services.isEmpty()}">
+                    <h2 class="section-title">🎯 Chọn Dịch Vụ (Có Thể Chọn Nhiều)</h2>
+                    <div class="alert alert-info">
+                        💡 Bạn có thể chọn nhiều dịch vụ cùng một lúc. Click vào dịch vụ để chọn, sau đó nhập số lượng phía dưới.
+                    </div>
+
+                    <div class="services-list">
+                        <div class="service-card" th:each="service : ${services}">
+                            <input type="checkbox" th:id="'service-' + ${service.serviceId}"
+                                   th:value="${service.serviceId}"
+                                   class="service-checkbox"
+                                   th:data-service-name="${service.serviceName}"
+                                   th:data-service-price="${service.price}">
+                            <label th:for="'service-' + ${service.serviceId}">
+                                <div class="service-content">
+                                    <div class="service-name" th:text="${service.serviceName}"></div>
+                                    <div class="service-price" th:text="${#numbers.formatInteger(service.price, 0, 'COMMA') + '₫'}"></div>
+                                    <div class="service-description">Click để chọn</div>
+                                </div>
+                            </label>
+                            <div class="check-icon">✓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Services Form -->
+                <div class="selected-services-form" id="selectedServicesForm" style="display: none;">
+                    <h2 class="section-title">📦 Dịch Vụ Đã Chọn - Nhập Số Lượng</h2>
+                    <form id="servicesSubmitForm" method="post" action="/receptionist/add-services-multiple">
+                        <input type="hidden" name="reservationId" th:value="${reservation.reservationId}">
+                        <div id="selectedServicesContainer"></div>
+                    </form>
+                </div>
+
+                <!-- Empty Message -->
+                <div id="emptyMessage" class="empty-message" style="display: none;">
+                    <p>📭 Chưa chọn dịch vụ nào. Vui lòng chọn ít nhất 1 dịch vụ.</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="/receptionist/check-in" class="btn-back">← Quay Lại</a>
+                    <button id="submitBtn" type="button" class="btn-finish" onclick="submitServices()" disabled>
+                        ✓ Hoàn Thành & Nhận Phòng
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            © 2024 Hệ thống Quản Lý Khách Sạn. Bản quyền được bảo vệ.
+        </footer>
+    </div>
+
+    <script>
+        // Sidebar toggle
+        const headerMenuIcon = document.getElementById('header-menu-icon');
+        const sidebarMenuIcon = document.getElementById('sidebar-menu-icon');
+        const dashboardContainer = document.getElementById('dashboard-container');
+
+        const toggleSidebar = () => {
+            dashboardContainer.classList.toggle('sidebar-collapsed');
+        };
+
+        headerMenuIcon.addEventListener('click', toggleSidebar);
+        sidebarMenuIcon.addEventListener('click', toggleSidebar);
+
+        // ===== CHỌN NHIỀU DỊCH VỤ - FIXED VERSION =====
+
+        // Lưu trữ các dịch vụ được chọn
+        let selectedServicesMap = {};
+
+        // Lấy tất cả checkboxes
+        const serviceCheckboxes = document.querySelectorAll('.service-checkbox');
+        const selectedServicesForm = document.getElementById('selectedServicesForm');
+        const selectedServicesContainer = document.getElementById('selectedServicesContainer');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Thêm event listener cho mỗi checkbox
+        serviceCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', function() {
+                updateSelectedServices();
+            });
+        });
+
+        function updateSelectedServices() {
+            selectedServicesMap = {};
+
+            // Collect tất cả checkbox được chọn
+            serviceCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const serviceId = checkbox.value;
+                    const serviceName = checkbox.getAttribute('data-service-name');
+                    const servicePrice = parseInt(checkbox.getAttribute('data-service-price'));
+
+                    selectedServicesMap[serviceId] = {
+                        id: serviceId,
+                        name: serviceName,
+                        price: servicePrice
+                    };
+                }
+            });
+
+            // Update UI dựa trên số lượng dịch vụ được chọn
+            const count = Object.keys(selectedServicesMap).length;
+
+            if (count > 0) {
+                selectedServicesForm.style.display = 'block';
+                emptyMessage.style.display = 'none';
+                submitBtn.disabled = false;
+                renderSelectedServices();
+            } else {
+                selectedServicesForm.style.display = 'none';
+                emptyMessage.style.display = 'block';
+                submitBtn.disabled = true;
+                selectedServicesContainer.innerHTML = '';
+            }
+        }
+
+        function renderSelectedServices() {
+            selectedServicesContainer.innerHTML = '';
+
+            for (const [serviceId, serviceData] of Object.entries(selectedServicesMap)) {
+                const div = document.createElement('div');
+                div.className = 'selected-service-item';
+                div.id = 'service-item-' + serviceId;
+
+                const formattedPrice = new Intl.NumberFormat('vi-VN').format(serviceData.price);
+
+                div.innerHTML = `
+                    <div>
+                        <span class="service-name-display">${serviceData.name}</span>
+                        <span class="service-price-display" style="display: block; font-size: 0.85rem; color: #999; margin-top: 0.3rem;">
+                            ${formattedPrice}₫
+                        </span>
+                    </div>
+                    <div>
+                        <input type="number"
+                               id="qty_${serviceId}"
+                               name="quantity_${serviceId}"
+                               min="1" max="100"
+                               value="1"
+                               class="quantity-input"
+                               onchange="updateTotal()"
+                               onkeyup="updateTotal()">
+                    </div>
+                    <button type="button"
+                            class="btn-remove-service"
+                            onclick="removeService(${serviceId})">
+                        🗑️ Xóa
+                    </button>
+                `;
+
+                selectedServicesContainer.appendChild(div);
+            }
+
+            updateTotal();
+        }
+
+        function removeService(serviceId) {
+            // Bỏ check từ checkbox gốc
+            const checkbox = document.querySelector(`.service-checkbox[value="${serviceId}"]`);
+            if (checkbox) {
+                checkbox.checked = false;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        }
+
+        function updateTotal() {
+            let totalServicePrice = 0;
+
+            // Lấy giá phòng từ HTML
+            const roomPriceText = document.getElementById('roomPrice').textContent;
+            const basPrice = parseInt(roomPriceText.replace(/[^0-9]/g, '')) || 0;
+
+            // Tính tổng giá dịch vụ từ các input
+            for (const [serviceId, serviceData] of Object.entries(selectedServicesMap)) {
+                const quantityInput = document.getElementById(`qty_${serviceId}`);
+                if (quantityInput) {
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    totalServicePrice += serviceData.price * quantity;
+                }
+            }
+
+            const total = basPrice + totalServicePrice;
+
+            // Update display
+            document.getElementById('serviceSum').textContent =
+                new Intl.NumberFormat('vi-VN').format(totalServicePrice) + '₫';
+            document.getElementById('totalSum').textContent =
+                new Intl.NumberFormat('vi-VN').format(total) + '₫';
+        }
+
+        function submitServices() {
+            const selectedIds = [];
+
+            // Collect selected service IDs
+            for (const [serviceId, serviceData] of Object.entries(selectedServicesMap)) {
+                selectedIds.push(serviceId);
+            }
+
+            if (selectedIds.length === 0) {
+                alert('⚠️ Vui lòng chọn ít nhất 1 dịch vụ!');
+                return;
+            }
+
+            // Lấy form và submit
+            const form = document.getElementById('servicesSubmitForm');
+            if (form) {
+                form.submit();
+            } else {
+                alert('❌ Lỗi: Form không tìm thấy');
+            }
+        }
+
+        // Auto-hide alerts
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
+

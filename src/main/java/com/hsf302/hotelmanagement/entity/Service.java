@@ -68,11 +68,6 @@ public class Service {
         this.serviceId = serviceId;
     }
 
-    @Transient
-    public int getId() {
-        return serviceId;
-    }
-
     public String getServiceName() {
         return serviceName;
     }

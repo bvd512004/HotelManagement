@@ -21,13 +21,16 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r WHERE r.roomType.roomTypeId = :roomTypeId AND r.roomStatus.roomStatus = 'Available'")
     List<Room> findAvailableRoomsByType(@Param("roomTypeId") int roomTypeId);
 
+    // Tìm phòng theo trạng thái
+    List<Room> findByRoomStatus(Room_Status roomStatus);
+
     @Query("""
         SELECT r FROM Room r
         WHERE r.roomType.roomTypeId = :roomTypeId
           AND r.roomStatus.roomStatus = 'Available'
           AND r.roomId NOT IN (
               SELECT rr.room.roomId FROM Reservation_Room rr
-              JOIN rr.reservationId res
+              JOIN rr.reservation res
               WHERE res.checkInDate < :checkOutDate
                 AND res.checkOutDate > :checkInDate
                 AND (res.status IS NULL OR res.status <> 'Cancelled')
@@ -36,8 +39,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     List<Room> findAvailableRoomsByTypeAndDate(@Param("roomTypeId") int roomTypeId,
                                                @Param("checkInDate") Date checkInDate,
                                                @Param("checkOutDate") Date checkOutDate);
-    
-    List<Room> findByRoomStatus(Room_Status roomStatus);
 
     @Query("SELECT count(r) FROM Room r WHERE r.roomType.roomTypeId = :roomTypeId")
     int countByRoomTypeId(@Param("roomTypeId") int roomTypeId);
@@ -59,7 +60,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
           AND (:floorId IS NULL OR r.floor.floorId = :floorId)
           AND r.roomId NOT IN (
               SELECT rr.room.roomId FROM Reservation_Room rr
-              JOIN rr.reservationId res
+              JOIN rr.reservation res
               WHERE res.checkInDate < :checkOutDate
                 AND res.checkOutDate > :checkInDate
                 AND (res.status IS NULL OR res.status <> 'Cancelled')
