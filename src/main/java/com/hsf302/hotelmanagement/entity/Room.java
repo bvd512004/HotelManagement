@@ -13,7 +13,7 @@ public class Room {
     @Column(name="RoomId")
     private int roomId;
 
-    @Column(name="RoomName")
+    @Column(name="RoomName",columnDefinition = "Nvarchar")
     private String roomName;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -21,15 +21,14 @@ public class Room {
     private RoomType roomType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="Room_StatusId")
+    @JoinColumn(name="RoomStatusId")
     private Room_Status roomStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="FloorId")
     private Floor floor;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="RoomId")
+    @OneToMany(mappedBy = "room")
     private List<Reservation_Room> reservation_rooms;
 
     public Room() {
@@ -56,6 +55,11 @@ public class Room {
 
     public void setRoomId(int roomId) {
         this.roomId = roomId;
+    }
+
+    @Transient
+    public int getId() {
+        return roomId;
     }
 
     public String getRoomName() {
@@ -98,15 +102,4 @@ public class Room {
         this.reservation_rooms = reservation_rooms;
     }
 
-    @Override
-    public String toString() {
-        return "Room{" +
-                "roomId=" + roomId +
-                ", roomName='" + roomName + '\'' +
-                ", roomType=" + roomType +
-                ", roomStatus=" + roomStatus +
-                ", floor=" + floor +
-                ", reservation_rooms=" + reservation_rooms +
-                '}';
-    }
 }

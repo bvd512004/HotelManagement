@@ -13,10 +13,10 @@ public class Guest {
     @Column(name="GuestId")
     private int guestId;
 
-    @Column(name="FirstName")
+    @Column(name="FirstName",columnDefinition = "Nvarchar")
     private String firstName;
 
-    @Column(name="LastName")
+    @Column(name="LastName",columnDefinition = "Nvarchar")
     private String lastName;
 
     @Column(name="Email", unique=true, nullable=false)
@@ -25,15 +25,13 @@ public class Guest {
     @Column(name="PhoneNumber", length=10, nullable=false)
     private String phoneNumber;
 
-    @Column(name="Address")
+    @Column(name="Address",columnDefinition = "Nvarchar")
     private String address;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="GuestId")
+    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="GuestGuestId")
+    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
     private List<Payment> payments ;
 
     public Guest() {
@@ -109,6 +107,15 @@ public class Guest {
 
     public void setPayments(List<Payment> payments) {
         this.payments = payments;
+    }
+
+    @Transient
+    public int getId() {
+        return guestId;
+    }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
     }
 
     @Override

@@ -79,6 +79,11 @@ public class Reservation {
         this.reservationId = reservationId;
     }
 
+    @Transient
+    public int getId() {
+        return reservationId;
+    }
+
     public Date getCheckInDate() {
         return checkInDate;
     }

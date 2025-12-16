@@ -4,19 +4,16 @@ import com.hsf302.hotelmanagement.entity.Floor;
 import com.hsf302.hotelmanagement.entity.Room;
 import com.hsf302.hotelmanagement.entity.RoomType;
 import com.hsf302.hotelmanagement.entity.Room_Status;
-import com.hsf302.hotelmanagement.repository.RoomRepository;
-import com.hsf302.hotelmanagement.repository.RoomTypeRepository;
-import com.hsf302.hotelmanagement.repository.FloorRepository;
-import com.hsf302.hotelmanagement.repository.Room_StatusRepository;
+import com.hsf302.hotelmanagement.repository.*;
 import com.hsf302.hotelmanagement.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class RoomServiceImpl implements RoomService {
+
     @Autowired
     private RoomRepository roomRepository;
 
@@ -30,7 +27,7 @@ public class RoomServiceImpl implements RoomService {
     private Room_StatusRepository roomStatusRepository;
 
     @Override
-    public List<Room> findAll() {
+    public List<Room> findAllWithRelations() {
         List<Room> rList =new ArrayList<>();
         for(Room room : roomRepository.findAllWithRelations()){
             rList.add(room);
@@ -111,7 +108,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Floor findFloorByNumber(int number) {
         for(Floor f : floorRepository.findAll()){
-            if(f.getFloor_number() == number){
+            if(f.getFloorNumber() == number){
                 return f;
             }
         }
@@ -147,5 +144,55 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
         room.setRoomType(roomType);
         roomRepository.save(room);
+    }
+
+    @Override
+    public List<Room> findAll() {
+        return roomRepository.findAll();
+    }
+
+    @Override
+    public Room findById(int id) {
+        return roomRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void save(Room room) {
+        roomRepository.save(room);
+    }
+
+    @Override
+    public void delete(int id) {
+        roomRepository.deleteById(id);
+    }
+
+    @Override
+    public List<RoomType> getAllRoomTypes() {
+        return roomTypeRepository.findAll();
+    }
+
+    @Override
+    public List<Room_Status> getAllRoomStatuses() {
+        return roomStatusRepository.findAll();
+    }
+
+    @Override
+    public List<Floor> getAllFloors() {
+        return floorRepository.findAll();
+    }
+
+    @Override
+    public RoomType getRoomTypeById(int id) {
+        return roomTypeRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Room_Status getRoomStatusById(int id) {
+        return roomStatusRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Floor getFloorById(int id) {
+        return floorRepository.findById(id).orElse(null);
     }
 }

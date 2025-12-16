@@ -12,14 +12,14 @@ import java.util.List;
 @Table(name="services")
 public class Service {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="ServiceId")
     private int serviceId;
 
-    @Column(name="ServiceName")
+    @Column(name="ServiceName",columnDefinition = "NVarchar")
     private String serviceName;
 
-    @Column(name="Description", length=500)
+    @Column(name="Description", length=500,columnDefinition = "NVarchar")
     private String description;
 
     @Column(name="Price")

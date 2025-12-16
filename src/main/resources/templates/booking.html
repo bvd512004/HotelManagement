@@ -241,10 +241,40 @@
             border-bottom: 1px solid #e0e6ed;
         }
 
+        .filter-form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            min-width: 160px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
         .filter-bar select {
             padding: 0.5rem 1rem;
             border: 1px solid #e0e6ed;
             border-radius: 8px;
+            background: #fafbfd;
+        }
+
+        .filter-submit {
+            background: #20b2aa;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .room-card {
@@ -333,6 +363,28 @@
         .select-btn:hover {
             background: #20b2aa;
             color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .pagination a {
+            padding: 0.6rem 0.9rem;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            background: white;
+        }
+
+        .pagination a.active {
+            background: #20b2aa;
+            color: white;
+            border-color: #20b2aa;
         }
 
         /* Bottom Bar */
@@ -595,57 +647,106 @@
         <!-- Right Content - Room List -->
         <div class="room-list">
             <div class="filter-bar">
-                <div>
-                    <span>Lưu trú: Theo ngày</span>
+                <form id="filterForm" class="filter-form" method="get" th:action="@{/booking}">
+                    <input type="hidden" name="checkInDate" th:value="${checkInDate}">
+                    <input type="hidden" name="checkOutDate" th:value="${checkOutDate}">
+                    <input type="hidden" name="adults" th:value="${adults}">
+                    <input type="hidden" name="children" th:value="${children}">
 
-                </div>
-                <select>
-                    <option>Giá theo: Tổng giá tiền</option>
-                </select>
+                    <div class="filter-group">
+                        <label>Hạng phòng</label>
+                        <select name="roomTypeId">
+                            <option value="" th:selected="${selectedRoomTypeId == null}">Tất cả</option>
+                            <option th:each="rt : ${roomTypes}"
+                                    th:value="${rt.roomTypeId}"
+                                    th:text="${rt.typeName}"
+                                    th:selected="${rt.roomTypeId == selectedRoomTypeId}">Standard</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Tầng</label>
+                        <select name="floorId">
+                            <option value="" th:selected="${selectedFloorId == null}">Tất cả</option>
+                            <option th:each="fl : ${floors}"
+                                    th:value="${fl.floorId}"
+                                    th:text="${'Tầng ' + fl.floorNumber}"
+                                    th:selected="${fl.floorId == selectedFloorId}">Tầng 1</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Giá</label>
+                        <select name="priceSort">
+                            <option value="asc" th:selected="${priceSort == 'asc'}">Thấp → Cao</option>
+                            <option value="desc" th:selected="${priceSort == 'desc'}">Cao → Thấp</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="filter-submit">Lọc</button>
+                </form>
             </div>
 
-            <div th:each="roomType : ${roomTypes}">
-                <div class="room-card">
-                    <img th:src="@{/images/room-{id}.jpg(id=${roomType.roomTypeId})}" 
-                         src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop" 
-                         alt="Phòng" 
+            <div th:if="${rooms != null and !rooms.isEmpty()}">
+                <div class="room-card" th:each="room : ${rooms}">
+                    <img th:src="@{/images/room-{id}.jpg(id=${room.roomType.roomTypeId})}"
+                         src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop"
+                         alt="Phòng"
                          class="room-image"
                          onerror="this.src='https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop'">
                     <div class="room-info">
                         <div>
-                            <h3 class="room-title" th:text="${roomType.typeName}">Standard</h3>
+                            <h3 class="room-title" th:text="${room.roomName}">Phòng 101</h3>
+                            <div class="room-capacity">
+                                <span>🏷️</span>
+                                <span th:text="${room.roomType.typeName}">Standard</span>
+                            </div>
+                            <div class="room-capacity">
+                                <span>📍</span>
+                                <span th:text="${'Tầng ' + room.floor.floorNumber}">Tầng 1</span>
+                            </div>
                             <div class="room-capacity">
                                 <span>👤</span>
-                                <span th:text="${roomType.capacity} + ' người lớn, 1 trẻ em'">1 người lớn, 1 trẻ em</span>
+                                <span th:text="${room.roomType.capacity} + ' người'">2 người</span>
                             </div>
-                            <p class="room-description" th:text="${roomType.description != null ? roomType.description : 'Chưa có mô tả'}">Chưa có mô tả</p>
+                            <p class="room-description" th:text="${room.roomType.description != null ? room.roomType.description : 'Chưa có mô tả'}">Chưa có mô tả</p>
                             <a href="#" 
                                class="room-details-link"
-                               th:data-room-id="${roomType.roomTypeId}"
-                               th:data-room-name="${roomType.typeName}"
-                               th:data-room-description="${roomType.description != null ? roomType.description : 'Chưa có mô tả'}"
-                               th:data-room-capacity="${roomType.capacity}"
-                               th:data-room-price="${roomType.basePrice}"
-                               th:data-checkin="${checkInDate}"
-                               th:data-checkout="${checkOutDate}"
-                               th:data-adults="${adults}"
-                               th:data-children="${children}"
-                               onclick="openRoomModalFromLink(this); return false;">
-                               Chi tiết →
-                            </a>
+                               th:attr="data-room-id=${room.roomId}, 
+                                        data-room-name=${room.roomName}, 
+                                        data-room-description=${room.roomType.description != null ? room.roomType.description : 'Chưa có mô tả'}, 
+                                        data-room-capacity=${room.roomType.capacity}, 
+                                        data-room-price=${room.roomType.basePrice}, 
+                                        data-room-type-id=${room.roomType.roomTypeId},
+                                        data-checkin=${checkInDate},
+                                        data-checkout=${checkOutDate},
+                                        data-adults=${adults},
+                                        data-children=${children}"
+                               onclick="openRoomModalFromData(this); return false;"
+                               style="cursor: pointer;">Xem chi tiết</a>
                         </div>
                         <div class="room-booking">
                             <div>
-                                <div class="room-availability">Còn  phòng trống</div>
+                                <div class="room-availability" th:text="${room.roomStatus.roomStatus}">Available</div>
                                 <div class="room-price">
-                                    <span th:text="${#numbers.formatInteger(roomType.basePrice, 0, 'COMMA')}">1,200,000</span> ℹ️
+                                    <span th:text="${#numbers.formatInteger(room.roomType.basePrice, 0, 'COMMA')}">1,200,000</span> ℹ️
                                 </div>
                             </div>
-                            <a th:href="@{/booking-details(roomTypeId=${roomType.roomTypeId}, quantity=1, checkInDate=${checkInDate}, checkOutDate=${checkOutDate}, adults=${adults}, children=${children})}" 
+                            <a th:href="@{/booking-details(roomTypeId=${room.roomType.roomTypeId}, roomId=${room.roomId}, quantity=1, checkInDate=${checkInDate}, checkOutDate=${checkOutDate}, adults=${adults}, children=${children})}"
                                class="select-btn">Chọn</a>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div th:if="${rooms == null || rooms.isEmpty()}" style="text-align: center; color: #666; padding: 1rem 0;">
+                Hiện chưa có phòng phù hợp bộ lọc.
+            </div>
+
+            <div class="pagination" th:if="${roomsPage != null and roomsPage.totalPages > 1}">
+                <a th:each="i : ${#numbers.sequence(0, roomsPage.totalPages - 1)}"
+                   th:href="@{/booking(page=${i}, roomTypeId=${selectedRoomTypeId != null ? selectedRoomTypeId : ''}, floorId=${selectedFloorId != null ? selectedFloorId : ''}, priceSort=${priceSort}, checkInDate=${checkInDate}, checkOutDate=${checkOutDate}, adults=${adults}, children=${children})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i == currentPage} ? 'active'">1</a>
             </div>
         </div>
     </div>
@@ -669,26 +770,58 @@
                  class="modal-image"
                  onerror="this.src='https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop'">
             <div class="modal-info">
-                <h2 class="modal-title" id="modalRoomTitle">Standard</h2>
+                <h2 class="modal-title" id="modalRoomTitle">Phòng</h2>
                 <div class="modal-capacity">
                     <span>👤</span>
-                    <span id="modalRoomCapacity">1 người lớn, 1 trẻ em</span>
+                    <span id="modalRoomCapacity">2 người</span>
                 </div>
                 <ul class="modal-capacity-details">
-                    <li>Số khách tiêu chuẩn: <span id="modalStandardGuests">1 người lớn, 1 trẻ em</span></li>
-                    <li>Số khách tối đa: <span id="modalMaxGuests">1 người lớn, 1 trẻ em</span></li>
+                    <li>Số khách tiêu chuẩn: <span id="modalStandardGuests">2 người</span></li>
+                    <li>Số khách tối đa: <span id="modalMaxGuests">2 người</span></li>
                 </ul>
                 <p class="modal-description" id="modalRoomDescription">Chưa có mô tả</p>
                 <div class="modal-price">
                     <span id="modalRoomPrice">1,200,000</span>
-                    <span>ℹ️</span>
+                    <span>VNĐ / đêm</span>
                 </div>
-                <a href="#" id="modalSelectBtn" class="modal-select-btn">Chọn</a>
+                <a href="#" id="modalSelectBtn" class="modal-select-btn">Chọn phòng này</a>
             </div>
         </div>
     </div>
 
     <script>
+        // Tự động set ngày mặc định khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkInDateInput = document.querySelector('input[name="checkInDate"]');
+            const checkOutDateInput = document.querySelector('input[name="checkOutDate"]');
+            
+            // Nếu không có giá trị, set mặc định
+            if (!checkInDateInput.value) {
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                checkInDateInput.value = today.toISOString().split('T')[0];
+                checkOutDateInput.value = tomorrow.toISOString().split('T')[0];
+            }
+            
+            // Cập nhật duration badge khi ngày thay đổi
+            function updateDuration() {
+                const checkIn = new Date(checkInDateInput.value);
+                const checkOut = new Date(checkOutDateInput.value);
+                const diffTime = Math.abs(checkOut - checkIn);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const durationBadge = document.querySelector('.duration-badge');
+                if (durationBadge) {
+                    durationBadge.textContent = diffDays + ' Ngày';
+                }
+            }
+            
+            checkInDateInput.addEventListener('change', updateDuration);
+            checkOutDateInput.addEventListener('change', updateDuration);
+            updateDuration();
+        });
+
         function increaseAdults() {
             const input = document.getElementById('adults');
             input.value = parseInt(input.value) + 1;
@@ -713,12 +846,13 @@
             }
         }
 
-        function openRoomModalFromLink(linkElement) {
+        function openRoomModalFromData(linkElement) {
             const roomId = linkElement.getAttribute('data-room-id');
             const roomName = linkElement.getAttribute('data-room-name');
             const roomDescription = linkElement.getAttribute('data-room-description');
             const roomCapacity = linkElement.getAttribute('data-room-capacity');
             const roomPrice = linkElement.getAttribute('data-room-price');
+            const roomTypeId = linkElement.getAttribute('data-room-type-id');
             const checkInDate = linkElement.getAttribute('data-checkin') || '';
             const checkOutDate = linkElement.getAttribute('data-checkout') || '';
             const adults = linkElement.getAttribute('data-adults') || '1';
@@ -735,11 +869,10 @@
             const modalSelectBtn = document.getElementById('modalSelectBtn');
 
             // Điền thông tin vào modal
-            modalTitle.textContent = roomName;
-            const capacityText = roomCapacity + ' người lớn, 1 trẻ em';
-            modalCapacity.textContent = capacityText;
-            modalStandardGuests.textContent = capacityText;
-            modalMaxGuests.textContent = capacityText;
+            modalTitle.textContent = roomName || 'Phòng';
+            modalCapacity.textContent = roomCapacity + ' người';
+            modalStandardGuests.textContent = roomCapacity + ' người';
+            modalMaxGuests.textContent = roomCapacity + ' người';
             modalDescription.textContent = roomDescription || 'Chưa có mô tả';
             
             // Format giá tiền
@@ -748,13 +881,14 @@
             modalPrice.textContent = formattedPrice;
 
             // Set ảnh
-            modalImage.src = '/images/room-' + roomId + '.jpg';
+            modalImage.src = '/images/room-' + roomTypeId + '.jpg';
             modalImage.onerror = function() {
                 this.src = 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&h=600&fit=crop';
             };
 
             // Set link chọn phòng
-            const selectUrl = '/booking-details?roomTypeId=' + roomId + 
+            const selectUrl = '/booking-details?roomTypeId=' + roomTypeId + 
+                            '&roomId=' + roomId +
                             '&quantity=1&checkInDate=' + encodeURIComponent(checkInDate) + 
                             '&checkOutDate=' + encodeURIComponent(checkOutDate) + 
                             '&adults=' + adults + 

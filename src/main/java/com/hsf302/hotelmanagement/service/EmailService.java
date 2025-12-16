@@ -23,9 +23,9 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public void sendBookingConfirmationEmail(String to, String guestName, int reservationId, 
-                                            String roomTypeName, int quantity, String checkInDate, 
-                                            String checkOutDate, double totalAmount) {
+    public void sendBookingConfirmationEmail(String to, String guestName, int reservationId,
+                                            String roomTypeName, int quantity, String roomNumbers,
+                                            String checkInDate, String checkOutDate, double totalAmount) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -44,6 +44,7 @@ public class EmailService {
             context.setVariable("reservationId", reservationId);
             context.setVariable("roomTypeName", roomTypeName);
             context.setVariable("quantity", quantity);
+            context.setVariable("roomNumbers", roomNumbers);
             context.setVariable("checkInDate", formattedCheckIn);
             context.setVariable("checkOutDate", formattedCheckOut);
             context.setVariable("totalAmount", totalAmount);

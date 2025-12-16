@@ -15,8 +15,7 @@ public class Room_Status {
     @Column(name="RoomStatus", length=50)
     private String roomStatus;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="Room_StatusId")
+    @OneToMany(mappedBy = "roomStatus")
     private List<Room> rooms;
 
     public Room_Status() {
@@ -37,6 +36,11 @@ public class Room_Status {
 
     public void setRoomStatusId(int roomStatusId) {
         this.roomStatusId = roomStatusId;
+    }
+
+    @Transient
+    public int getId() {
+        return roomStatusId;
     }
 
     public String getRoomStatus() {

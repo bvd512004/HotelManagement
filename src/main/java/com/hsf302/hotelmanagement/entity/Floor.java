@@ -13,17 +13,16 @@ public class Floor {
     private int floorId;
 
     @Column(name="Floor_Number")
-    private int floor_number;
+    private int floorNumber;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="FloorId")
+    @OneToMany(mappedBy = "floor")
     private List<Room> rooms;
 
     public Floor() {
     }
 
-    public Floor(int floor_number, List<Room> rooms) {
-        this.floor_number = floor_number;
+    public Floor(int floorNumber, List<Room> rooms) {
+        this.floorNumber = floorNumber;
         this.rooms = rooms;
     }
 
@@ -39,12 +38,17 @@ public class Floor {
         this.floorId = floorId;
     }
 
-    public int getFloor_number() {
-        return floor_number;
+    @Transient
+    public int getId() {
+        return floorId;
     }
 
-    public void setFloor_number(int floor_number) {
-        this.floor_number = floor_number;
+    public int getFloorNumber() {
+        return floorNumber;
+    }
+
+    public void setFloorNumber(int floorNumber) {
+        this.floorNumber = floorNumber;
     }
 
     public List<Room> getRooms() {
@@ -59,7 +63,7 @@ public class Floor {
     public String toString() {
         return "Floor{" +
                 "floorId=" + floorId +
-                ", floor_number=" + floor_number +
+                ", floorNumber=" + floorNumber +
                 ", rooms=" + rooms +
                 '}';
     }
