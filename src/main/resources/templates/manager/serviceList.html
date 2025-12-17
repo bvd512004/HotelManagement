@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="service-content">
+    <h1>Service List</h1>
+
+    <!-- Search Form -->
+    <div class="filter-form">
+        <form th:action="@{/manager/services-fragment}" method="post">
+            <label for="serviceName">Service Name:</label>
+            <input type="text" id="serviceName" name="serviceName" placeholder="Search by name" th:value="${serviceName}">
+
+            <label for="category">Category:</label>
+            <input type="text" id="category" name="category" placeholder="Search by category" th:value="${category}">
+
+            <button type="submit">Search</button>
+            <button type="button" th:onclick="|loadContent('@{/manager/services-fragment}')|">Reset</button>
+        </form>
+    </div>
+
+    <!-- Service Table -->
+    <table border="1px" style="width: 100%; margin-top: 20px;">
+        <thead>
+        <tr>
+            <th>Service Name</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="service : ${serviceList}">
+            <td th:text="${service.serviceName}"></td>
+            <td th:text="${service.category}"></td>
+            <td th:text="${service.status}"></td>
+            <td th:text="${service.quantity}"></td>
+            <td th:text="${#numbers.formatDecimal(service.price, 0, 'COMMA', 2, 'POINT')}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

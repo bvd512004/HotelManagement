@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Dashboard</title>
+    <style>
+        /* --- General Body & Font Styling --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Header --- */
+        .header {
+            background-color: #0056b3; /* Màu xanh dương đậm */
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- Main Layout Wrapper --- */
+        .main-wrapper {
+            display: flex;
+            flex: 1; /* Chiếm hết không gian còn lại của body */
+        }
+
+        /* --- Sidebar (1/4 màn hình) --- */
+        .sidebar {
+            width: 25%; /* Chiếm 1/4 chiều rộng */
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar .menu-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px 20px;
+            border-radius: 5px;
+            text-align: left;
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            margin-bottom: 10px;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar .menu-item:hover {
+            background-color: #e9ecef;
+            border-left-color: #007bff; /* Màu xanh dương khi hover */
+            transform: translateX(5px);
+        }
+
+        /* --- Content Area (3/4 màn hình) --- */
+        .main-content {
+            width: 75%; /* Chiếm 3/4 chiều rộng */
+            padding: 30px;
+        }
+
+        #content-area {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            min-height: 500px; /* Đảm bảo chiều cao tối thiểu */
+        }
+
+        /* --- CSS CHO CÁC FORM TRONG FRAGMENT --- */
+
+        /* --- Form Container --- */
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
+            border-top: 5px solid #0056b3;
+            margin: 0 auto; /* Căn giữa form trong content-area */
+        }
+
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* --- Input Fields & Select Dropdown --- */
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước tổng thể */
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: #007bff; /* Màu xanh dương khi focus */
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        /* --- Styling cho readonly/disabled inputs (trong edit form) --- */
+        input[readonly], select[disabled] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
+        /* --- Buttons --- */
+        .button-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input[type="submit"], button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff; /* Màu xanh dương chủ đạo */
+            color: white;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3; /* Màu xanh dương đậm hơn khi hover */
+        }
+
+        button.btn-secondary {
+            background-color: #6c757d; /* Màu xám cho nút phụ */
+            color: white;
+            margin-left: 10px;
+        }
+
+        button.btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* --- Error Message --- */
+        .error-message {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #dc3545; /* Màu đỏ cho lỗi */
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Welcome Manager</h1>
+<div class="header">
+    <h1>Manager Dashboard</h1>
+</div>
+
+<div class="main-wrapper">
+    <div class="sidebar">
+        <button class="menu-item" onclick="loadContent('/manager/overview-fragment')">📊 Overview</button>
+        <button class="menu-item" onclick="loadContent('/rooms/manager/rooms-fragment')">🏨 View All Rooms</button>
+        <button class="menu-item" onclick="loadContent('/rooms/manager/add-room-type-fragment')">➕ Add New Room Type</button>
+        <button class="menu-item" onclick="loadContent('/rooms/manager/add-room-fragment')">🛏️ Add New Room</button>
+        <button class="menu-item" onclick="loadContent('/reservations/manager/reservations-fragment')">📋 View Reservation List</button>
+        <button class="menu-item" onclick="loadContent('/manager/services-fragment')">🧼 View Service List</button>
+    </div>
+
+    <div class="main-content">
+        <div id="content-area">
+            <!-- Content will be loaded here by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const contentArea = document.getElementById('content-area');
+
+    function loadContent(url) {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(html => {
+                contentArea.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                contentArea.innerHTML = `<p style="color: red;">Error loading content from ${url}.</p>`;
+            });
+    }
+
+    contentArea.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const url = new URL(form.action, window.location.origin);
+        const formData = new FormData(form);
+
+        if (form.method.toLowerCase() === 'get') {
+            formData.forEach((value, key) => {
+                url.searchParams.append(key, value);
+            });
+            loadContent(url.href);
+        } else { // POST
+            fetch(url, {
+                method: form.method,
+                body: new URLSearchParams(formData)
+            })
+            .then(response => response.text())
+            .then(html => { contentArea.innerHTML = html; })
+            .catch(error => { console.error('Error submitting form:', error); });
+        }
+    });
+
+    // Load the overview fragment by default when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        loadContent('/manager/overview-fragment');
+    });
+</script>
+
+</body>
+</html>
