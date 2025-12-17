@@ -1,17 +1,25 @@
 package com.hsf302.hotelmanagement.controller;
 
+import com.hsf302.hotelmanagement.dto.response.RoomDTO;
+import com.hsf302.hotelmanagement.entity.Floor;
 import com.hsf302.hotelmanagement.entity.Room;
 import com.hsf302.hotelmanagement.entity.RoomType;
 import com.hsf302.hotelmanagement.entity.Room_Status;
-import com.hsf302.hotelmanagement.entity.Floor;
-import com.hsf302.hotelmanagement.service.RoomService;
 import com.hsf302.hotelmanagement.repository.RoomTypeRepository;
+import com.hsf302.hotelmanagement.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +31,7 @@ public class RoomController {
 
     @Autowired
     private RoomService roomService;
-  
+
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 
@@ -38,33 +46,44 @@ public class RoomController {
     public String gallery() {
         return "gallery";
     }
+
     @GetMapping("/list")
-    public String listRooms(Model model) {
-        List<Room> rooms = roomService.findAll();
+    public String listRooms(@RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                            @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                            @RequestParam(name = "status", required = false) String status,
+                            Model model) {
+
+        // Default to today if dates are not provided
+        LocalDate filterStartDate = (startDate == null) ? LocalDate.now() : startDate;
+        LocalDate filterEndDate = (endDate == null) ? filterStartDate : endDate;
+
+
+        List<RoomDTO> roomDTOs = roomService.getRoomsWithStatus(filterStartDate, filterEndDate, status);
 
         // Group rooms by floor
-        Map<Floor, List<Room>> floorRooms = new LinkedHashMap<>();
-
-        // Sort rooms by floor number and group them
-        rooms.stream()
+        Map<Floor, List<RoomDTO>> floorRooms = new LinkedHashMap<>();
+        roomDTOs.stream()
+                .filter(r -> r.getRoom().getRoomStatus() != null && "Available".equals(r.getRoom().getRoomStatus().getRoomStatus()))
                 .sorted((r1, r2) -> {
-                    if (r1.getFloor() == null && r2.getFloor() == null) return 0;
-                    if (r1.getFloor() == null) return 1;
-                    if (r2.getFloor() == null) return -1;
-                    return Integer.compare(r1.getFloor().getFloorId(), r2.getFloor().getFloorId());
+                    if (r1.getRoom().getFloor() == null && r2.getRoom().getFloor() == null) return 0;
+                    if (r1.getRoom().getFloor() == null) return 1;
+                    if (r2.getRoom().getFloor() == null) return -1;
+                    return Integer.compare(r1.getRoom().getFloor().getFloorId(), r2.getRoom().getFloor().getFloorId());
                 })
-                .forEach(room -> {
-                    Floor floor = room.getFloor();
-                    floorRooms.computeIfAbsent(floor, k -> new java.util.ArrayList<>()).add(room);
+                .forEach(roomDTO -> {
+                    Floor floor = roomDTO.getRoom().getFloor();
+                    floorRooms.computeIfAbsent(floor, k -> new java.util.ArrayList<>()).add(roomDTO);
                 });
 
-        model.addAttribute("rooms", rooms);
         model.addAttribute("floorRooms", floorRooms);
-        model.addAttribute("view", "room-list");
+        model.addAttribute("startDate", filterStartDate);
+        model.addAttribute("endDate", filterEndDate);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("statusOptions", Arrays.asList("Booked", "Reserved", "Available"));
 
-        // Return the main layout
-        return "dashboard-layout";
+        return "room-list";
     }
+
 
     @GetMapping("/create")
     public String showCreateRoomForm(Model model) {
@@ -87,9 +106,9 @@ public class RoomController {
 
     @PostMapping("/save")
     public String saveRoom(@ModelAttribute("room") Room room,
-                          @RequestParam(required = false) Integer roomTypeId,
-                          @RequestParam(required = false) Integer roomStatusId,
-                          @RequestParam(required = false) Integer floorId) {
+                           @RequestParam(required = false) Integer roomTypeId,
+                           @RequestParam(required = false) Integer roomStatusId,
+                           @RequestParam(required = false) Integer floorId) {
 
         // Fetch and set the related entities from database
         if (roomTypeId != null) {
@@ -118,4 +137,3 @@ public class RoomController {
     }
 
 }
-

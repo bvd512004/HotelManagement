@@ -54,6 +54,11 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    public com.hsf302.hotelmanagement.entity.Service getServiceById(int id) {
+        return serviceRepository.findById(id).orElse(null);
+    }
+
+    @Override
     public List<Reservation> findConflictingReservations(int roomId, Date checkIn, Date checkOut) {
         // Lấy tất cả reservation
         List<Reservation> allReservations = reservationRepository.findAll();
@@ -72,5 +77,9 @@ public class ReservationServiceImpl implements ReservationService {
                 })
                 .collect(Collectors.toList());
     }
-}
 
+    @Override
+    public List<Reservation> findByRoomId(int roomId) {
+        return reservationRepository.findByRoomId(roomId);
+    }
+}

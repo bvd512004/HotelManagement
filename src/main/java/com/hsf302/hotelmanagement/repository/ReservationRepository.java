@@ -46,4 +46,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             @Param("status") String status,
             @Param("searchTerm") String searchTerm,
             Pageable pageable);
+
+    @Query("SELECT r FROM Reservation r JOIN r.reservation_rooms rr WHERE rr.room.roomId = :roomId")
+    List<Reservation> findByRoomId(@Param("roomId") int roomId);
 }

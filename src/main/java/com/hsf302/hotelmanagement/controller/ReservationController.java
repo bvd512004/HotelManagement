@@ -12,9 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequestMapping("/reservations")
@@ -32,10 +37,25 @@ public class ReservationController {
     @GetMapping
     public String listReservations(Model model) {
         model.addAttribute("reservations", reservationService.findAll());
-        model.addAttribute("view", "reservation-list");
+        return "reservation-list";
+    }
 
-        // Return the main layout
-        return "dashboard-layout";
+    @GetMapping("/{id}")
+    public String viewReservation(@PathVariable("id") int id, Model model) {
+        Reservation reservation = reservationService.findById(id);
+        model.addAttribute("reservation", reservation);
+        model.addAttribute("view", "reservation-details");
+        return "reservation-details";
+    }
+
+    @GetMapping("/room/{roomId}")
+    public String listReservationsForRoom(@PathVariable("roomId") int roomId, Model model) {
+        List<Reservation> reservations = reservationService.findByRoomId(roomId);
+        Room room = roomService.findById(roomId);
+        model.addAttribute("reservations", reservations);
+        model.addAttribute("roomName", room != null ? room.getRoomName() : "");
+        model.addAttribute("view", "room-reservation-list");
+        return "room-reservation-list";
     }
 
     // API để kiểm tra phòng có khả dụng không
@@ -61,7 +81,7 @@ public class ReservationController {
             // Kiểm tra trạng thái phòng
             if (room.getRoomStatus() != null) {
                 String status = room.getRoomStatus().getRoomStatus();
-                if (status.equals("Occupied") || status.equals("Dirty") || status.equals("Cleaning")) {
+                if (status.equals("Occupied") || status.equals("Dirty")) {
                     Map<String, Object> response = new HashMap<>();
                     response.put("available", false);
                     response.put("message", "Phòng hiện tại đang " + status);
@@ -217,10 +237,11 @@ public class ReservationController {
 
             // Parse dates
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            reservation.setCheckInDate(sdf.parse(dto.getCheckInDate()));
-            reservation.setCheckOutDate(sdf.parse(dto.getCheckOutDate()));
+            Date checkInDate = sdf.parse(dto.getCheckInDate());
+            Date checkOutDate = sdf.parse(dto.getCheckOutDate());
+            reservation.setCheckInDate(checkInDate);
+            reservation.setCheckOutDate(checkOutDate);
             reservation.setNumberOfGuests(dto.getNumberOfGuests());
-            reservation.setTotalAmount(dto.getGrandTotal());
             reservation.setStatus("Pending");
             reservation.setCreatedAt(LocalDateTime.now());
             reservation.setGuest(guest);
@@ -230,7 +251,7 @@ public class ReservationController {
             Room room = roomService.findById(dto.getRoomId());
             Reservation_Room resRoom = new Reservation_Room();
             resRoom.setRoom(room);
-            resRoom.setStatus("Booked");
+            resRoom.setStatus("Reserved");
             resRoom.setNote("");
             reservationRooms.add(resRoom);
             reservation.setReservation_rooms(reservationRooms);
@@ -240,7 +261,16 @@ public class ReservationController {
                 rr.setReservation(reservation);
             }
 
-            // Tạo reservation_services
+            // Tính toán lại tổng tiền ở backend
+            double totalRoomPrice = 0;
+            if (room != null && room.getRoomType() != null) {
+                long diffInMillies = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+                long nights = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                if (nights == 0) nights = 1; // Minimum 1 night
+                totalRoomPrice = room.getRoomType().getBasePrice() * nights;
+            }
+
+            double totalServicePrice = 0;
             List<Reservation_Service> reservationServices = new ArrayList<>();
             if (dto.getServiceIds() != null && !dto.getServiceIds().isEmpty()) {
                 for (int i = 0; i < dto.getServiceIds().size(); i++) {
@@ -248,12 +278,10 @@ public class ReservationController {
                     int quantity = dto.getServiceQuantities() != null && i < dto.getServiceQuantities().size()
                             ? dto.getServiceQuantities().get(i) : 1;
 
-                    Service service = reservationService.getAllServices().stream()
-                            .filter(s -> s.getServiceId() == serviceId)
-                            .findFirst()
-                            .orElse(null);
+                    Service service = reservationService.getServiceById(serviceId);
 
                     if (service != null) {
+                        totalServicePrice += service.getPrice() * quantity;
                         Reservation_Service resService = new Reservation_Service();
                         resService.setService(service);
                         resService.setQuantity(quantity);
@@ -265,6 +293,10 @@ public class ReservationController {
             }
             reservation.setReservation_services(reservationServices);
 
+            double grandTotal = totalRoomPrice + totalServicePrice;
+            reservation.setTotalAmount(grandTotal);
+
+
             // Lưu reservation
             Reservation savedReservation = reservationService.save(reservation);
 
@@ -273,7 +305,7 @@ public class ReservationController {
                 Room_Status reservedStatus = null;
                 List<Room_Status> allStatuses = roomService.getAllRoomStatuses();
                 for (Room_Status status : allStatuses) {
-                    if (status.getRoomStatus().equals("Reserved")) {
+                    if (status.getRoomStatus().equals("Available")) {
                         reservedStatus = status;
                         break;
                     }
@@ -300,4 +332,3 @@ public class ReservationController {
         }
     }
 }
-
