@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
-    @GetMapping({"/", "/home", "/index"})
+    @GetMapping({"/", "/home"})
     public String home(HttpServletRequest request, Model model) {
 
         HttpSession session = request.getSession(false);
