@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+@org.springframework.stereotype.Service
 public class ReservationServiceImpl implements ReservationService {
 
     @Autowired
@@ -138,6 +138,10 @@ public class ReservationServiceImpl implements ReservationService {
 
         return total;
     }
+    @Override
+    public List<Reservation> findByRoomId(int roomId) {
+        return reservationRepository.findByRoomId(roomId);
+    }
 
     @Override
     public double calculateTotalIncome(String filter) {
@@ -154,12 +158,5 @@ public class ReservationServiceImpl implements ReservationService {
         } else {
             return getAllReservations();
         }
-    }
-}
-
-
-    @Override
-    public List<Reservation> findByRoomId(int roomId) {
-        return reservationRepository.findByRoomId(roomId);
     }
 }
