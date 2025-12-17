@@ -47,6 +47,29 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             @Param("searchTerm") String searchTerm,
             Pageable pageable);
 
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.guest " +
+            "JOIN FETCH r.reservation_rooms rr " +
+            "JOIN FETCH rr.room room " +
+            "JOIN FETCH room.roomType " +
+            "WHERE r.checkInDate < :startOfTomorrow AND r.checkOutDate >= :startOfToday")
+    List<Reservation> findReservationsTodayWithDetails(@Param("startOfToday") Date startOfToday, @Param("startOfTomorrow") Date startOfTomorrow);
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.guest " +
+            "JOIN FETCH r.reservation_rooms rr " +
+            "JOIN FETCH rr.room room " +
+            "JOIN FETCH room.roomType " +
+            "WHERE FUNCTION('YEAR', r.checkInDate) = FUNCTION('YEAR', :date) AND FUNCTION('MONTH', r.checkInDate) = FUNCTION('MONTH', :date)")
+    List<Reservation> findReservationsThisMonthWithDetails(@Param("date") Date date);
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.guest " +
+            "JOIN FETCH r.reservation_rooms rr " +
+            "JOIN FETCH rr.room room " +
+            "JOIN FETCH room.roomType")
+    List<Reservation> findAllWithDetails();
+
     @Query("SELECT r FROM Reservation r JOIN r.reservation_rooms rr WHERE rr.room.roomId = :roomId")
     List<Reservation> findByRoomId(@Param("roomId") int roomId);
 }

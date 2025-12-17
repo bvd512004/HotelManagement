@@ -21,4 +21,20 @@ public interface RoomService {
     Room_Status getRoomStatusById(int id);
     Floor getFloorById(int id);
     List<RoomDTO> getRoomsWithStatus(LocalDate startDate, LocalDate endDate, String status);
+    List<Room> findAllWithRelations();
+    List<RoomType> findAllRoomTypes();
+    List<Room> findByName(String name);
+    List<Room> findByType(String type);
+    List<Room> findByNameAndType(String name, String type);
+    Room findRoomById(int id);
+    boolean checkDuplicate(String name);
+    public boolean checkDuplicate4Room(String name);
+    public void addNewRoomType(RoomType roomType);
+    public void addNewRoom(Room room);
+    public List<Floor> findAllFloor();
+    public Floor findFloorByNumber(int number);
+    RoomType findTypeByName(String typeName);
+    Room_Status findRoomStatusByName(String status);
+    void deleteRoom(int id);
+    void updateRoom(int id, RoomType roomType);
 }

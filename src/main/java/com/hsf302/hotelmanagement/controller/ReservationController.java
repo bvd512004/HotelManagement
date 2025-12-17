@@ -1,6 +1,7 @@
 package com.hsf302.hotelmanagement.controller;
 
 import com.hsf302.hotelmanagement.dto.response.ReservationDTO;
+import com.hsf302.hotelmanagement.dto.response.overviewReservationDTO; // Import the new DTO
 import com.hsf302.hotelmanagement.entity.*;
 import com.hsf302.hotelmanagement.repository.GuestRepository;
 import com.hsf302.hotelmanagement.service.ReservationService;
@@ -12,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Controller
 @RequestMapping("/reservations")
@@ -242,6 +247,7 @@ public class ReservationController {
             reservation.setCheckInDate(checkInDate);
             reservation.setCheckOutDate(checkOutDate);
             reservation.setNumberOfGuests(dto.getNumberOfGuests());
+            reservation.setTotalAmount(dto.getGrandTotal());
             reservation.setStatus("Pending");
             reservation.setCreatedAt(LocalDateTime.now());
             reservation.setGuest(guest);
@@ -331,4 +337,51 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+    @GetMapping("/manager/reservations-fragment")
+    public String showReservationList(@RequestParam(value = "filter", required = false, defaultValue = "all") String filter, Model model) {
+        List<Reservation> reservations;
+        if ("today".equals(filter)) {
+            reservations = reservationService.getReservationForToday();
+        } else if ("month".equals(filter)) {
+            reservations = reservationService.getReservationForThisMonth();
+        } else {
+            reservations = reservationService.getAllReservations();
+        }
+
+        List<overviewReservationDTO> reservationList = new ArrayList<>();
+
+        for (Reservation res : reservations) {
+            if (res.getReservation_rooms() != null) {
+                for (Reservation_Room reservationRoom : res.getReservation_rooms()) {
+                    // Add more comprehensive null checks
+                    if (res.getGuest() != null && reservationRoom.getRoom() != null &&
+                        reservationRoom.getRoom().getRoomType() != null &&
+                        res.getCheckInDate() != null && res.getCheckOutDate() != null) {
+                        try {
+                            String guestName = res.getGuest().getFirstName() + " " + res.getGuest().getLastName();
+                            String roomName = reservationRoom.getRoom().getRoomName();
+
+                            overviewReservationDTO dto = new overviewReservationDTO(
+                                    res.getReservationId(),
+                                    guestName,
+                                    roomName,
+                                    res.getCheckInDate(),
+                                    res.getCheckOutDate(),
+                                    res.getNumberOfGuests(),
+                                    res.getTotalAmount() // Use the total amount from the reservation object
+                            );
+                            reservationList.add(dto);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
+        model.addAttribute("resList", reservationList);
+        model.addAttribute("filter", filter);
+        return "manager/reservationList :: reservation-content";
+    }
+
 }

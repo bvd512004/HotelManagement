@@ -19,7 +19,7 @@ public class Service {
     @Column(name="ServiceName",columnDefinition = "NVarchar(50)")
     private String serviceName;
 
-    @Column(name="Description", length=500,columnDefinition = "NVarchar(255)")
+    @Column(name="Description", length=500,columnDefinition = "NVarchar(500)")
     private String description;
 
     @Column(name="Price")

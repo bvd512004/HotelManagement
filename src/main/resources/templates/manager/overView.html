@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="overview-content">
+    <h1>Hotel Overview</h1>
+
+    <!-- Filter Buttons -->
+    <div class="filter-buttons" style="margin-bottom: 20px;">
+        <button type="button" th:onclick="|loadContent('@{/manager/overview-fragment(filter='today')}')|" th:classappend="${filter == 'today'} ? 'active' : ''">Today</button>
+        <button type="button" th:onclick="|loadContent('@{/manager/overview-fragment(filter='month')}')|" th:classappend="${filter == 'month'} ? 'active' : ''">This Month</button>
+        <button type="button" th:onclick="|loadContent('@{/manager/overview-fragment(filter='all')}')|" th:classappend="${filter == 'all'} ? 'active' : ''">All Time</button>
+    </div>
+
+    <div class="overview-grid">
+        <div class="overview-card">
+            <h2>Total Room Revenue</h2>
+            <p th:text="${#numbers.formatDecimal(totalRoomAmount, 0, 'COMMA', 2, 'POINT')} + ' VNĐ'"></p>
+        </div>
+        <div class="overview-card">
+            <h2>Total Service Revenue</h2>
+            <p th:text="${#numbers.formatDecimal(totalServiceAmount, 0, 'COMMA', 2, 'POINT')} + ' VNĐ'"></p>
+        </div>
+        <div class="overview-card">
+            <h2>Total Income</h2>
+            <p th:text="${#numbers.formatDecimal(totalIncome, 0, 'COMMA', 2, 'POINT')} + ' VNĐ'"></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .overview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .overview-card {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+    }
+    .overview-card h2 {
+        margin-top: 0;
+        color: #495057;
+    }
+    .overview-card p {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+    }
+    /* Styles for active filter button */
+    .filter-buttons button.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+</style>
+
+</body>
+</html>

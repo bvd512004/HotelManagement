@@ -14,4 +14,11 @@ public interface ReservationService {
     Service getServiceById(int id);
     List<Reservation> findConflictingReservations(int roomId, Date checkIn, Date checkOut);
     List<Reservation> findByRoomId(int roomId);
+    List<Reservation> getReservationForThisMonth();
+    List<Reservation> getReservationForToday();
+    List<Reservation> getAllReservations();
+
+    double calculateTotalRoomAmount(String filter);
+    double calculateTotalServiceAmount(String filter);
+    double calculateTotalIncome(String filter);
 }
