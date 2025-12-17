@@ -10,6 +10,7 @@ public interface UserService {
     List<User> searchUsers(String name, String role);
     Page<User> searchUsersPage(String name, String role, Pageable pageable);
     User findById(int id);
+    User findByUserName(String userName);
     void save(User user);
     void update(User user);
     void deleteById(int id);
