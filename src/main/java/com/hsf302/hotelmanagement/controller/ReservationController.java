@@ -218,7 +218,7 @@ public class ReservationController {
             Room room = roomService.findById(dto.getRoomId());
             Reservation_Room resRoom = new Reservation_Room();
             resRoom.setRoom(room);
-            resRoom.setStatus("Booked");
+            resRoom.setStatus("Reserved");
             resRoom.setNote("");
             reservationRooms.add(resRoom);
             reservation.setReservation_rooms(reservationRooms);
@@ -329,3 +329,4 @@ public class ReservationController {
         return "manager/reservationList :: reservation-content";
     }
 }
+

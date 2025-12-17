@@ -1,8 +1,6 @@
 package com.hsf302.hotelmanagement.service;
 
-import com.hsf302.hotelmanagement.entity.Reservation;
-import com.hsf302.hotelmanagement.entity.Service;
-
+import com.hsf302.hotelmanagement.entity.*;
 import java.util.Date;
 import java.util.List;
 
@@ -18,8 +16,8 @@ public interface ReservationService {
     List<Reservation> getReservationForToday();
     List<Reservation> getAllReservations();
 
-    // Updated methods for Overview with filter
     double calculateTotalRoomAmount(String filter);
     double calculateTotalServiceAmount(String filter);
     double calculateTotalIncome(String filter);
 }
+

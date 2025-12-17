@@ -6,23 +6,55 @@
     <title th:text="${pageTitle} ?: 'Check-out'">Check-out</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
-        .dashboard-container { display: grid; grid-template-columns: 260px 1fr; grid-template-rows: 60px 1fr auto; grid-template-areas: "header header" "sidebar content" "sidebar footer"; height: 100vh; }
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+        }
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            grid-template-rows: 60px 1fr auto;
+            grid-template-areas: "header header" "sidebar content" "sidebar footer";
+            height: 100vh;
+            width: 100vw;
+            max-width: 100%;
+            transition: grid-template-columns 0.3s ease;
+        }
+        .dashboard-container.sidebar-collapsed { grid-template-columns: 0px 1fr; }
         .header { grid-area: header; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 0 20px; z-index: 10; }
         .menu-icon { cursor: pointer; font-size: 24px; color: #333; margin-right: 20px; }
         .header-title { font-size: 1.5rem; color: #20b2aa; font-weight: 600; margin-right: auto; }
         .user-profile { display: flex; align-items: center; gap: 10px; }
         .user-profile img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .sidebar { grid-area: sidebar; background-color: #2c3e50; color: #ecf0f1; padding-top: 10px; overflow: hidden; }
+        .sidebar { grid-area: sidebar; background-color: #2c3e50; color: #ecf0f1; padding-top: 10px; overflow: hidden; white-space: nowrap; transition: width 0.3s ease; }
         .sidebar-header { display: flex; align-items: center; gap: 15px; padding: 10px 20px 20px 20px; }
+        .sidebar-header .menu-icon { color: #ecf0f1; }
         .sidebar-title { font-size: 1.2rem; font-weight: 600; }
         .sidebar-menu { list-style: none; padding: 0; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; color: #ecf0f1; text-decoration: none; border-left: 4px solid transparent; }
         .sidebar-menu li a:hover { background-color: #34495e; }
         .sidebar-menu li a.active { background-color: #34495e; border-left-color: #20b2aa; font-weight: bold; }
-        .main-content { grid-area: content; padding: 30px; overflow-y: auto; }
-        .footer { grid-area: footer; background-color: #ffffff; padding: 15px 30px; text-align: center; color: #888; border-top: 1px solid #e9ecef; }
-        h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1.5rem; color: #2c3e50; }
+        .main-content {
+            grid-area: content;
+            padding: 15px;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 100%;
+        }
+        .content-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+        }
         .alert { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; font-size: 1rem; }
         .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -30,12 +62,125 @@
         .btn:hover { background: #17a2b8; }
         .btn-secondary { background: #6c757d; color: white; }
         .btn-secondary:hover { background: #5a6268; }
+
+        .footer { grid-area: footer; background-color: #ffffff; padding: 15px 30px; text-align: center; color: #888; border-top: 1px solid #e9ecef; }
+        h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1.5rem; color: #2c3e50; }
+
+        /* Table full width styles */
+        .table-container {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            width: 100%;
+            max-width: 100%;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .table-full {
+            width: 100%;
+            min-width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+            background: white;
+        }
+        .table-full th, .table-full td {
+            padding: 0.8rem;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .table-full th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .table-full tbody tr {
+            border-bottom: 1px solid #dee2e6;
+        }
+        .table-full tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Search form styles */
+        .search-form {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Pagination styles */
+        .pagination-wrapper {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Empty state styles */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 10px;
+            }
+            .content-card {
+                padding: 1rem;
+                margin: 0;
+            }
+            .table-container {
+                overflow-x: auto;
+                margin: 10px 0;
+                width: 100%;
+            }
+            .table-full {
+                min-width: 800px;
+                width: 100%;
+            }
+            .search-form {
+                padding: 1rem;
+                width: 100%;
+            }
+            .pagination-wrapper {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+            .dashboard-container {
+                width: 100vw;
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
+    <div class="dashboard-container" id="dashboard-container">
         <header class="header">
-            <div class="menu-icon">☰</div>
+            <div class="menu-icon" id="header-menu-icon">☰</div>
             <div class="header-title">Quản Lý Check-out</div>
             <div class="user-profile">
                 <img src="https://i.pravatar.cc/150?u=receptionist" alt="User Avatar">
@@ -45,94 +190,124 @@
 
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="menu-icon">☰</div>
+                <div class="menu-icon" id="sidebar-menu-icon">☰</div>
                 <span class="sidebar-title">Menu</span>
             </div>
             <ul class="sidebar-menu">
-                <li><a th:href="@{/receptionist/check-in}">Check-in</a></li>
-                <li><a th:href="@{/receptionist/check-out}" th:classappend="${activePage == 'check-out'} ? 'active'">Check-out</a></li>
+                <li><a th:href="@{/receptionist/check-in}">📋 Check-in</a></li>
+                <li><a th:href="@{/receptionist/check-out}" th:classappend="${activePage == 'check-out'} ? 'active'">🚪 Check-out</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
-            <h1>🚪 Danh Sách Check-out</h1>
+            <div class="content-card">
+                <h1>🚪 Danh Sách Check-out</h1>
 
-            <!-- Alert Messages -->
-            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                <!-- Alert Messages -->
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-            <!-- Search Form -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <form method="get" action="/receptionist/check-out" style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" name="search" placeholder="🔍 Tìm kiếm tên khách hàng..."
-                           th:value="${param.search}" style="flex: 1; padding: 0.7rem 1rem; border: 1px solid #ddd; border-radius: 6px;">
-                    <button type="submit" class="btn" style="background: #20b2aa;">Tìm kiếm</button>
-                    <a href="/receptionist/check-out" class="btn" style="background: #6c757d;">Reset</a>
-                </form>
-            </div>
+                <!-- Search Form -->
+                <div class="search-form">
+                    <form method="get" action="/receptionist/check-out" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                        <input type="text" name="search" placeholder="🔍 Tìm kiếm tên khách hàng..."
+                               th:value="${param.search}" style="flex: 1; padding: 0.7rem 1rem; border: 1px solid #ddd; border-radius: 6px; min-width: 200px;">
+                        <button type="submit" class="btn" style="background: #20b2aa; white-space: nowrap;">Tìm kiếm</button>
+                        <a href="/receptionist/check-out" class="btn" style="background: #6c757d; white-space: nowrap;">Reset</a>
+                    </form>
+                </div>
 
-            <!-- Empty State -->
-            <div th:if="${#lists.isEmpty(reservations.content)}" style="text-align: center; padding: 60px 20px;">
-                <div style="font-size: 4rem; margin-bottom: 20px;">🚪</div>
-                <div style="font-size: 1.3rem; color: #666;">Không có khách nào cần check-out</div>
-            </div>
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(reservations.content)}" class="empty-state">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🚪</div>
+                    <div style="font-size: 1.3rem; color: #666;">Không có khách nào cần check-out</div>
+                </div>
 
             <!-- Table -->
-            <div th:unless="${#lists.isEmpty(reservations.content)}" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <table style="width: 100%; border-collapse: collapse;">
+            <div th:unless="${#lists.isEmpty(reservations.content)}" class="table-container">
+                <table class="table-full">
                     <thead>
-                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                            <th style="padding: 1rem; text-align: left; font-weight: 600;">STT</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Mã ĐP</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Khách Hàng</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Phòng</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Check-in</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Check-out</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Tổng Tiền</th>
-                            <th style="padding: 1rem; text-align: center; font-weight: 600;">Hành Động</th>
+                        <tr>
+                            <th style="width: 5%;">STT</th>
+                            <th style="width: 8%;">Mã ĐP</th>
+                            <th style="width: 25%;">Khách Hàng</th>
+                            <th style="width: 12%;">Phòng</th>
+                            <th style="width: 13%;">Check-in</th>
+                            <th style="width: 13%;">Check-out</th>
+                            <th style="width: 14%;">Tổng Tiền</th>
+                            <th style="width: 10%; text-align: center;">Hành Động</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="reservation, iterStat : ${reservations.content}" style="border-bottom: 1px solid #dee2e6;">
-                            <td style="padding: 1rem;" th:text="${iterStat.count + (currentPage * 10)}"></td>
-                            <td style="padding: 1rem;" th:text="${reservation.reservationId}"></td>
-                            <td style="padding: 1rem;">
+                        <tr th:each="reservation, iterStat : ${reservations.content}">
+                            <td th:text="${iterStat.count + (currentPage * 10)}"></td>
+                            <td th:text="${reservation.reservationId}"></td>
+                            <td style="white-space: normal;">
                                 <strong th:text="${reservation.guest.fullName}"></strong><br>
                                 <small style="color: #666;" th:text="${reservation.guest.email}"></small>
                             </td>
-                            <td style="padding: 1rem;">
+                            <td>
                                 <span th:if="${!reservation.reservation_rooms.isEmpty()}"
                                       th:text="${reservation.reservation_rooms.get(0).room.roomName}"></span>
                             </td>
-                            <td style="padding: 1rem;" th:text="${#dates.format(reservation.checkInDate, 'dd/MM HH:mm')}"></td>
-                            <td style="padding: 1rem;" th:text="${#dates.format(reservation.checkOutDate, 'dd/MM HH:mm')}"></td>
-                            <td style="padding: 1rem; font-weight: 600;" th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA')} + '₫'"></td>
-                            <td style="padding: 1rem; text-align: center;">
-                                <button type="button"
-                                        class="btn checkout-btn"
-                                        th:data-reservation-id="${reservation.reservationId}"
-                                        th:data-guest-name="${reservation.guest.fullName}"
-                                        style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 6px; font-weight: 600;">
-                                    🚪 Trả Phòng
-                                </button>
+                            <td th:text="${#dates.format(reservation.checkInDate, 'dd/MM HH:mm')}"></td>
+                            <td th:text="${#dates.format(reservation.checkOutDate, 'dd/MM HH:mm')}"></td>
+                            <td style="font-weight: 600;" th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA')} + '₫'"></td>
+                            <td style="text-align: center;">
+                                <!-- Nếu status = Confirmed (Đã check-in) → Hiển thị nút "Trả Phòng" -->
+                                <th:block th:if="${reservation.status == 'Confirmed'}">
+                                    <button type="button"
+                                            class="btn checkout-btn"
+                                            th:data-reservation-id="${reservation.reservationId}"
+                                            th:data-guest-name="${reservation.guest.fullName}"
+                                            style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 6px; font-weight: 600;">
+                                        🚪 Trả Phòng
+                                    </button>
+                                </th:block>
+
+                                <!-- Nếu status = CheckedOut (Đã hoàn thành) → Hiển thị badge "Đã Hoàn Thành" -->
+                                <th:block th:if="${reservation.status == 'CheckedOut'}">
+                                    <button type="button"
+                                            disabled
+                                            style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: default; opacity: 0.8;">
+                                        ✓ Đã Hoàn Thành
+                                    </button>
+                                </th:block>
+
+                                <!-- Nếu status khác (Pending, v.v.) → Không hiển thị nút -->
+                                <th:block th:unless="${reservation.status == 'Confirmed' || reservation.status == 'CheckedOut'}">
+                                    <span style="color: #999; font-size: 0.9rem;">Chưa sẵn sàng</span>
+                                </th:block>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div th:if="${totalPages > 1}" style="margin-top: 20px; display: flex; justify-content: center; gap: 5px;">
-                <a th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
-                   th:href="@{/receptionist/check-out(page=${page})}"
-                   th:text="${page + 1}"
-                   th:classappend="${page == currentPage} ? 'active' : ''"
-                   style="padding: 0.5rem 0.8rem; text-decoration: none; border-radius: 4px; font-weight: 600; border: 1px solid #ddd;"></a>
+                <!-- Pagination -->
+                <div class="pagination-wrapper">
+                    <a th:if="${currentPage > 0}" th:href="@{/receptionist/check-out(page=${currentPage - 1}, size=${pageSize}, search=${search})}" style="padding: 0.7rem 1rem; text-decoration: none; border-radius: 6px; border: 1px solid #ddd; background: #20b2aa; color: white; font-weight: 600; cursor: pointer;">← Trước</a>
+                    <span th:if="${currentPage == 0}" style="padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid #ddd; color: #999; font-weight: 600;">← Trước</span>
+
+                    <span style="padding: 0.7rem 1rem; border: none; font-weight: 600; color: #333; white-space: nowrap;">Trang <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span> | Tổng: <span th:text="${totalElements}"></span> bản ghi</span>
+
+                    <a th:if="${currentPage < totalPages - 1}" th:href="@{/receptionist/check-out(page=${currentPage + 1}, size=${pageSize}, search=${search})}" style="padding: 0.7rem 1rem; text-decoration: none; border-radius: 6px; border: 1px solid #ddd; background: #20b2aa; color: white; font-weight: 600; cursor: pointer;">Sau →</a>
+                    <span th:if="${currentPage == totalPages - 1}" style="padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid #ddd; color: #999; font-weight: 600;">Sau →</span>
+
+                    <form method="get" action="/receptionist/check-out" style="display: inline; margin: 0;">
+                        <input type="hidden" name="search" th:value="${search}">
+                        <select name="size" onchange="this.form.submit();" style="padding: 0.7rem 1rem; background: #20b2aa; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                            <option value="10" th:selected="${pageSize == 10}">10 bản ghi</option>
+                            <option value="15" th:selected="${pageSize == 15}">15 bản ghi</option>
+                            <option value="20" th:selected="${pageSize == 20}">20 bản ghi</option>
+                        </select>
+                    </form>
+                </div>
             </div>
         </main>
 
         <footer class="footer">
-            &copy; 2024 Hotel Management System. All Rights Reserved.
+            © 2024 Hệ thống Quản Lý Khách Sạn. Bản quyền được bảo vệ.
         </footer>
     </div>
 
@@ -189,6 +364,18 @@
             }
         }
 
+        // Sidebar toggle
+        const headerMenuIcon = document.getElementById('header-menu-icon');
+        const sidebarMenuIcon = document.getElementById('sidebar-menu-icon');
+        const dashboardContainer = document.getElementById('dashboard-container');
+
+        const toggleSidebar = () => {
+            dashboardContainer.classList.toggle('sidebar-collapsed');
+        };
+
+        if (headerMenuIcon) headerMenuIcon.addEventListener('click', toggleSidebar);
+        if (sidebarMenuIcon) sidebarMenuIcon.addEventListener('click', toggleSidebar);
+
         // Event listener cho checkout buttons
         document.querySelectorAll('.checkout-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -203,6 +390,13 @@
             if (event.target === this) {
                 closeCheckOutModal();
             }
+        });
+
+        // Auto-hide alerts sau 5 giây
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
         });
     </script>
 </body>

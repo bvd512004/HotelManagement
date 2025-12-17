@@ -79,6 +79,12 @@
             opacity: 0.8;
         }
 
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
         .book-btn {
             background: white;
             color: #20b2aa; /* Teal color */
@@ -96,6 +102,25 @@
         .book-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .login-btn {
+            background: transparent;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .login-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
         }
 
         /* Hero Section */
@@ -302,7 +327,10 @@
                 <li><a th:href="@{/gallery}">Lưu giữ khoảnh khắc</a></li>
                 <li><a th:href="@{/rooms}">Hạng phòng</a></li>
             </ul>
-            <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
+            <div class="nav-buttons">
+                <a th:href="@{/login}" class="login-btn">Đăng nhập</a>
+                <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
+            </div>
         </nav>
     </header>
 

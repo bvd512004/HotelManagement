@@ -1,9 +1,9 @@
 package com.hsf302.hotelmanagement.controller;
 
-import com.hsf302.hotelmanagement.entity.Floor;
 import com.hsf302.hotelmanagement.entity.Room;
 import com.hsf302.hotelmanagement.entity.RoomType;
 import com.hsf302.hotelmanagement.entity.Room_Status;
+import com.hsf302.hotelmanagement.entity.Floor;
 import com.hsf302.hotelmanagement.service.RoomService;
 import com.hsf302.hotelmanagement.repository.RoomTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.ArrayList;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +27,7 @@ public class RoomController {
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 
-    // --- Fragment Loading Endpoints (GET) ---
+
 
     @GetMapping("/manager/rooms-fragment")
     public String getRoomsFragment(Model model) {
@@ -155,6 +152,18 @@ public class RoomController {
     public String viewRoomsByManager(Model model) {
         return getRoomsFragment(model);
     }
+    @GetMapping("/rooms")
+    public String rooms(Model model) {
+        List<RoomType> roomTypes = roomTypeRepository.findAll();
+        model.addAttribute("roomTypes", roomTypes);
+        return "rooms";
+    }
+
+    @GetMapping("/gallery")
+    public String gallery() {
+        return "gallery";
+
+    }
     @GetMapping("/list")
     public String listRooms(Model model) {
         List<Room> rooms = roomService.findAll();
@@ -235,3 +244,4 @@ public class RoomController {
     }
 
 }
+

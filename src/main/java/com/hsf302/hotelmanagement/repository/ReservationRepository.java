@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
+import java.util.List;
+
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
     List<Reservation> findByGuestId(int guestId);
@@ -18,6 +20,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     List<Reservation> findByStatus(String status);
     Page<Reservation> findByStatus(String status, Pageable pageable);
 
+    // Tìm kiếm theo tên khách hàng hoặc email trong khoảng ngày check-in
     @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.checkInDate BETWEEN :startDate AND :endDate " +
             "AND (LOWER(r.guest.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
             "OR LOWER(r.guest.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
@@ -29,6 +32,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             @Param("status") String status,
             Pageable pageable);
 
+    // Tìm kiếm theo khoảng ngày check-in
     @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.checkInDate BETWEEN :startDate AND :endDate")
     Page<Reservation> findByStatusAndCheckInDateBetween(
             @Param("status") String status,
@@ -36,6 +40,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             @Param("endDate") Date endDate,
             Pageable pageable);
 
+    // Tìm kiếm theo status và tên khách
     @Query("SELECT r FROM Reservation r WHERE r.status = :status AND (LOWER(r.guest.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(r.guest.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     Page<Reservation> findByStatusAndGuestFullNameContainingIgnoreCase(
             @Param("status") String status,

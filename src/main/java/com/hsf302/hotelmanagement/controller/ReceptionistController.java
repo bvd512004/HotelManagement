@@ -34,9 +34,6 @@ public class ReceptionistController {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    /**
-     * Hiển thị danh sách check-in
-     */
     @GetMapping("/check-in")
     public String checkInList(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -48,24 +45,31 @@ public class ReceptionistController {
             Model model) {
 
         Pageable pageable = PageRequest.of(page, size);
-
-        // Mặc định filter ngày hôm nay nếu không có fromDate/toDate
-        String today = LocalDate.now().toString();
-        if (fromDate == null || fromDate.isEmpty()) {
-            fromDate = today;
-        }
-        if (toDate == null || toDate.isEmpty()) {
-            toDate = today;
-        }
-
-        // Xác định status dựa trên tab
-        // "pending" → "Pending", "checked" → "Confirmed"
         String status = "pending".equals(tab) ? "Pending" : "Confirmed";
 
-        // Gọi service với date range và status
-        Page<Reservation> reservations = receptionistService.getReservationsByDateRange(
-            searchTerm, fromDate, toDate, status, pageable
-        );
+        Page<Reservation> reservations;
+
+        if ((fromDate == null || fromDate.isEmpty()) && (toDate == null || toDate.isEmpty())) {
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                reservations = reservationRepository.findByStatus(status, pageable);
+            } else {
+                reservations = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
+                    status, searchTerm.trim(), pageable);
+            }
+        } else {
+            String today = LocalDate.now().toString();
+            if (fromDate == null || fromDate.isEmpty()) {
+                fromDate = today;
+            }
+            if (toDate == null || toDate.isEmpty()) {
+                toDate = today;
+            }
+
+            reservations = receptionistService.getReservationsByDateRange(
+                searchTerm, fromDate, toDate, status, pageable
+            );
+        }
+
 
         model.addAttribute("reservations", reservations.getContent());
         model.addAttribute("currentPage", page);
@@ -73,16 +77,13 @@ public class ReceptionistController {
         model.addAttribute("totalPages", reservations.getTotalPages());
         model.addAttribute("totalElements", reservations.getTotalElements());
         model.addAttribute("searchTerm", searchTerm);
-        model.addAttribute("fromDate", fromDate);
-        model.addAttribute("toDate", toDate);
+        model.addAttribute("fromDate", fromDate != null ? fromDate : "");
+        model.addAttribute("toDate", toDate != null ? toDate : "");
         model.addAttribute("tab", tab);
 
         return "receptionist/check-in";
     }
 
-    /**
-     * Xử lý check-in khách hàng
-     */
     @PostMapping("/check-in")
     public String processCheckIn(
             @RequestParam("reservationId") Integer reservationId,
@@ -107,9 +108,6 @@ public class ReceptionistController {
         return "redirect:/receptionist/check-in?page=" + page + "&size=" + size;
     }
 
-    /**
-     * Hiển thị trang thêm dịch vụ
-     */
     @GetMapping("/add-service")
     public String addServiceForm(
             @RequestParam("reservationId") Integer reservationId,
@@ -127,9 +125,6 @@ public class ReceptionistController {
         }
     }
 
-    /**
-     * Xử lý thêm dịch vụ vào đặt phòng
-     */
     @PostMapping("/add-service")
     public String processAddService(
             @RequestParam("reservationId") Integer reservationId,
@@ -226,24 +221,6 @@ public class ReceptionistController {
         }
     }
 
-    /**
-     * Lấy danh sách phòng đang sử dụng (OCCUPIED) - cho mục đích chỉnh sửa dịch vụ
-     */
-    @GetMapping("/occupied-rooms")
-    public String getOccupiedRooms(Model model) {
-        try {
-            var occupiedRooms = receptionistService.getOccupiedRooms();
-            model.addAttribute("occupiedRooms", occupiedRooms);
-            model.addAttribute("pageTitle", "Danh Sách Phòng Đang Sử Dụng");
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "✗ Lỗi: " + e.getMessage());
-        }
-        return "receptionist/occupied-rooms";
-    }
-
-    /**
-     * Hiển thị danh sách phòng cần check-out
-     */
     @GetMapping("/check-out")
     public String showCheckOutPage(
             @RequestParam(value = "search", required = false) String search,
@@ -251,22 +228,59 @@ public class ReceptionistController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
         try {
-            // Lấy danh sách reservations với status = Confirmed (đã check-in)
             Page<Reservation> reservations;
             Pageable pageable = PageRequest.of(page, size);
 
             if (search != null && !search.isEmpty()) {
-                // Tìm kiếm theo tên khách
-                reservations = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
+                Page<Reservation> confirmed = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
                     "Confirmed", search, pageable);
+                Page<Reservation> checkedOut = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
+                    "CheckedOut", search, pageable);
+
+                java.util.List<Reservation> allReservations = new java.util.ArrayList<>();
+                allReservations.addAll(confirmed.getContent());
+                allReservations.addAll(checkedOut.getContent());
+
+                // Sort by reservation ID descending
+                allReservations.sort((a, b) -> Integer.compare(b.getReservationId(), a.getReservationId()));
+
+                // Create a Page object
+                int totalElements = (int) (confirmed.getTotalElements() + checkedOut.getTotalElements());
+                reservations = new org.springframework.data.domain.PageImpl<>(
+                    allReservations.stream().limit(size).collect(java.util.stream.Collectors.toList()),
+                    pageable,
+                    totalElements
+                );
             } else {
-                // Lấy tất cả reservations với status Confirmed
-                reservations = reservationRepository.findByStatus("Confirmed", pageable);
+                Page<Reservation> confirmed = reservationRepository.findByStatus("Confirmed", pageable);
+                Page<Reservation> checkedOut = reservationRepository.findByStatus("CheckedOut", pageable);
+
+                java.util.List<Reservation> allReservations = new java.util.ArrayList<>();
+                allReservations.addAll(confirmed.getContent());
+                allReservations.addAll(checkedOut.getContent());
+
+                allReservations.sort((a, b) -> Integer.compare(b.getReservationId(), a.getReservationId()));
+
+                // Create a Page object
+                int totalElements = (int) (confirmed.getTotalElements() + checkedOut.getTotalElements());
+                reservations = new org.springframework.data.domain.PageImpl<>(
+                    allReservations.stream().limit(size).collect(java.util.stream.Collectors.toList()),
+                    pageable,
+                    totalElements
+                );
             }
 
             model.addAttribute("reservations", reservations);
             model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", reservations.getTotalPages());
+            model.addAttribute("pageSize", size);
+
+            // Tính totalPages chính xác
+            int totalElements = (int) reservations.getTotalElements();
+            int totalPages = (totalElements + size - 1) / size;  // Ceiling division
+            if (totalPages == 0) totalPages = 1;  // Tối thiểu 1 trang
+
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", totalElements);
             model.addAttribute("pageTitle", "Danh Sách Check-out");
             model.addAttribute("activePage", "check-out");
         } catch (Exception e) {
@@ -275,9 +289,6 @@ public class ReceptionistController {
         return "receptionist/check-out";
     }
 
-    /**
-     * Hiển thị hóa đơn check-out
-     */
     @GetMapping("/invoice/{reservationId}")
     public String showInvoice(
             @PathVariable("reservationId") Integer reservationId,

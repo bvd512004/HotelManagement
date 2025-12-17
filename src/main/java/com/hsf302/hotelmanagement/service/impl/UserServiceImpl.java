@@ -61,6 +61,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByUserName(String userName) {
+        return userRepository.findByUserName(userName);
+    }
+
+    @Override
     @Transactional
     public void save(User user) {
         // In a real app, you'd encode the password here before saving
