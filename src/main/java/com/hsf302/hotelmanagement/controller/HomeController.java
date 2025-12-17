@@ -12,7 +12,7 @@ public class HomeController {
 
     @GetMapping({"/", "/home", "/index"})
     public String home(HttpServletRequest request, Model model) {
-        
+
         HttpSession session = request.getSession(false);
         
         User user = null;
