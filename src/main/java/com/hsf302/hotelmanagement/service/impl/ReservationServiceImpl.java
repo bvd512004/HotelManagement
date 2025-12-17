@@ -4,8 +4,9 @@ import com.hsf302.hotelmanagement.entity.Reservation;
 import com.hsf302.hotelmanagement.entity.Reservation_Room;
 import com.hsf302.hotelmanagement.entity.Reservation_Service;
 import com.hsf302.hotelmanagement.entity.Service;
-import com.hsf302.hotelmanagement.repository.ReservationRepository;
 import com.hsf302.hotelmanagement.repository.ReservationServiceRepository;
+import com.hsf302.hotelmanagement.repository.ReservationRepository;
+import com.hsf302.hotelmanagement.repository.ServiceRepository;
 import com.hsf302.hotelmanagement.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
@@ -60,6 +61,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public List<Service> getAllServices() {
         return serviceRepository.findAll();
+    }
+
+    @Override
+    public com.hsf302.hotelmanagement.entity.Service getServiceById(int id) {
+        return serviceRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -132,6 +138,10 @@ public class ReservationServiceImpl implements ReservationService {
 
         return total;
     }
+    @Override
+    public List<Reservation> findByRoomId(int roomId) {
+        return reservationRepository.findByRoomId(roomId);
+    }
 
     @Override
     public double calculateTotalIncome(String filter) {
@@ -150,4 +160,3 @@ public class ReservationServiceImpl implements ReservationService {
         }
     }
 }
-

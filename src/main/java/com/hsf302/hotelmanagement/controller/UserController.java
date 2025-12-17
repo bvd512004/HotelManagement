@@ -33,19 +33,17 @@ public class UserController {
         model.addAttribute("totalItems", usersPage.getTotalElements());
         model.addAttribute("searchName", name != null ? name : "");
         model.addAttribute("searchRole", role != null ? role : "");
-        model.addAttribute("view", "user-list");
 
         // Return the main layout
-        return "dashboard-layout";
+        return "user-list";
     }
 
     @GetMapping("/add")
     public String showAddUserForm(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("view", "user-form");
 
         // Return the main layout
-        return "dashboard-layout";
+        return "user-form";
     }
 
     @PostMapping

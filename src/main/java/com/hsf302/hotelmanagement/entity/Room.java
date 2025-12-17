@@ -2,7 +2,9 @@ package com.hsf302.hotelmanagement.entity;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -30,6 +32,9 @@ public class Room {
 
     @OneToMany(mappedBy = "room")
     private List<Reservation_Room> reservation_rooms;
+
+    @ManyToMany(mappedBy = "rooms")
+    private Set<Task> tasks = new HashSet<>();
 
     public Room() {
     }
@@ -102,4 +107,11 @@ public class Room {
         this.reservation_rooms = reservation_rooms;
     }
 
+    public Set<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
 }
