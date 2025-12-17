@@ -39,7 +39,10 @@ public class SecurityConfig {
                 .requestMatchers("/", "/index", "/booking", "/booking-details", 
                                 "/booking/complete", "/booking/success", "/login", "/logout",
                                 "/gallery", "/rooms", "/rooms/gallery", "/rooms/rooms").permitAll()
-                    .requestMatchers("/manager/**","/reservations/**","/rooms").hasRole("MANAGER")
+                
+                // Manager URLs - chỉ Manager hoặc Admin
+                .requestMatchers("/manager/**", "/rooms/manager/**", "/reservations/manager/**")
+                    .hasAnyRole("MANAGER", "ADMIN")
                 
                 // Admin URLs - chỉ Admin
                 .requestMatchers("/users/**", "/rooms/create",
@@ -111,6 +114,8 @@ public class SecurityConfig {
                     return "HOUSEKEEPING_STAFF";
                 } else if ("Receptionist".equals(role)) {
                     return "RECEPTIONIST";
+                } else if ("Manager".equals(role)) {
+                    return "MANAGER";
                 }
                 return role.toUpperCase().replace(" ", "_");
             }

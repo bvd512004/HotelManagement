@@ -337,6 +337,7 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
     @GetMapping("/manager/reservations-fragment")
     public String showReservationList(@RequestParam(value = "filter", required = false, defaultValue = "all") String filter, Model model) {
         List<Reservation> reservations;
