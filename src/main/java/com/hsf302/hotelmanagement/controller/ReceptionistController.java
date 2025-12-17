@@ -34,9 +34,6 @@ public class ReceptionistController {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    /**
-     * Hiển thị danh sách check-in
-     */
     @GetMapping("/check-in")
     public String checkInList(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -48,24 +45,18 @@ public class ReceptionistController {
             Model model) {
 
         Pageable pageable = PageRequest.of(page, size);
-
-        // Xác định status dựa trên tab
         String status = "pending".equals(tab) ? "Pending" : "Confirmed";
 
         Page<Reservation> reservations;
 
-        // Nếu không có fromDate và toDate, hiển thị tất cả
         if ((fromDate == null || fromDate.isEmpty()) && (toDate == null || toDate.isEmpty())) {
             if (searchTerm == null || searchTerm.trim().isEmpty()) {
-                // Không có search term và không có date range → hiển thị tất cả
                 reservations = reservationRepository.findByStatus(status, pageable);
             } else {
-                // Có search term nhưng không có date range → tìm theo tên trong tất cả
                 reservations = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
                     status, searchTerm.trim(), pageable);
             }
         } else {
-            // Có date range → dùng logic cũ với date range
             String today = LocalDate.now().toString();
             if (fromDate == null || fromDate.isEmpty()) {
                 fromDate = today;
@@ -93,9 +84,6 @@ public class ReceptionistController {
         return "receptionist/check-in";
     }
 
-    /**
-     * Xử lý check-in khách hàng
-     */
     @PostMapping("/check-in")
     public String processCheckIn(
             @RequestParam("reservationId") Integer reservationId,
@@ -120,9 +108,6 @@ public class ReceptionistController {
         return "redirect:/receptionist/check-in?page=" + page + "&size=" + size;
     }
 
-    /**
-     * Hiển thị trang thêm dịch vụ
-     */
     @GetMapping("/add-service")
     public String addServiceForm(
             @RequestParam("reservationId") Integer reservationId,
@@ -140,9 +125,6 @@ public class ReceptionistController {
         }
     }
 
-    /**
-     * Xử lý thêm dịch vụ vào đặt phòng
-     */
     @PostMapping("/add-service")
     public String processAddService(
             @RequestParam("reservationId") Integer reservationId,
@@ -239,24 +221,6 @@ public class ReceptionistController {
         }
     }
 
-    /**
-     * Lấy danh sách phòng đang sử dụng (OCCUPIED) - cho mục đích chỉnh sửa dịch vụ
-     */
-    @GetMapping("/occupied-rooms")
-    public String getOccupiedRooms(Model model) {
-        try {
-            var occupiedRooms = receptionistService.getOccupiedRooms();
-            model.addAttribute("occupiedRooms", occupiedRooms);
-            model.addAttribute("pageTitle", "Danh Sách Phòng Đang Sử Dụng");
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "✗ Lỗi: " + e.getMessage());
-        }
-        return "receptionist/occupied-rooms";
-    }
-
-    /**
-     * Hiển thị danh sách phòng cần check-out
-     */
     @GetMapping("/check-out")
     public String showCheckOutPage(
             @RequestParam(value = "search", required = false) String search,
@@ -264,18 +228,15 @@ public class ReceptionistController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
         try {
-            // Lấy danh sách reservations với status = Confirmed hoặc CheckedOut
             Page<Reservation> reservations;
             Pageable pageable = PageRequest.of(page, size);
 
             if (search != null && !search.isEmpty()) {
-                // Tìm kiếm theo tên khách cho cả Confirmed và CheckedOut
                 Page<Reservation> confirmed = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
                     "Confirmed", search, pageable);
                 Page<Reservation> checkedOut = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
                     "CheckedOut", search, pageable);
 
-                // Merge both lists (simplified - trong thực tế nên dùng custom query)
                 java.util.List<Reservation> allReservations = new java.util.ArrayList<>();
                 allReservations.addAll(confirmed.getContent());
                 allReservations.addAll(checkedOut.getContent());
@@ -291,16 +252,13 @@ public class ReceptionistController {
                     totalElements
                 );
             } else {
-                // Lấy tất cả reservations với status Confirmed hoặc CheckedOut
                 Page<Reservation> confirmed = reservationRepository.findByStatus("Confirmed", pageable);
                 Page<Reservation> checkedOut = reservationRepository.findByStatus("CheckedOut", pageable);
 
-                // Merge both lists
                 java.util.List<Reservation> allReservations = new java.util.ArrayList<>();
                 allReservations.addAll(confirmed.getContent());
                 allReservations.addAll(checkedOut.getContent());
 
-                // Sort by reservation ID descending
                 allReservations.sort((a, b) -> Integer.compare(b.getReservationId(), a.getReservationId()));
 
                 // Create a Page object
@@ -331,9 +289,6 @@ public class ReceptionistController {
         return "receptionist/check-out";
     }
 
-    /**
-     * Hiển thị hóa đơn check-out
-     */
     @GetMapping("/invoice/{reservationId}")
     public String showInvoice(
             @PathVariable("reservationId") Integer reservationId,
