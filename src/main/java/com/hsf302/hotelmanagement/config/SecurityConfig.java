@@ -42,14 +42,15 @@ public class SecurityConfig {
                     .requestMatchers("/manager/**","/reservations/**","/rooms").hasRole("MANAGER")
                 
                 // Admin URLs - chỉ Admin
-                .requestMatchers("/users/**", "/rooms/list", "/rooms/create", 
+                .requestMatchers("/users/**", "/rooms/create",
                                 "/rooms/edit/**", "/rooms/save").hasRole("ADMIN")
+                    .requestMatchers("/rooms/list").hasAnyRole("ADMIN","RECEPTIONIST")
                 
                 // Housekeeping Staff URLs - chỉ HouseKeeping Staff
-                .requestMatchers("/tasks/**", "/tasks-management/**").hasRole("HOUSEKEEPING_STAFF")
+                .requestMatchers("/tasks/**", "/tasks-management/**").hasAnyRole("HOUSEKEEPING_STAFF","RECEPTIONIST")
                 
                 // Receptionist URLs - Receptionist hoặc Admin
-                .requestMatchers("/receptionist/**", "/reservations/**")
+                .requestMatchers("/receptionist/**", "/reservations/**","/room/")
                     .hasAnyRole("RECEPTIONIST", "ADMIN")
                 
                 // API requests - public (có thể cần điều chỉnh)
@@ -85,7 +86,7 @@ public class SecurityConfig {
                     String role = (String) session.getAttribute("role");
                     
                     if (user != null && role != null) {
-                        // Chuyển đổi role để phù hợp với Spring Security
+
                         String springSecurityRole = convertRoleToSpringSecurityRole(role);
                         
                         // Tạo authentication object và đưa vào SecurityContext

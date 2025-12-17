@@ -47,7 +47,7 @@ public class LoginController {
                 // Điều hướng người dùng đến trang tương ứng với role của họ
                 String role = user.getRole();
                 if ("Admin".equals(role)) {
-                    // Admin được điều hướng đến trang quản lý users
+
                     return "redirect:/users";
                 } else if ("Receptionist".equals(role)) {
                     // Receptionist được điều hướng đến trang check-in
@@ -55,8 +55,9 @@ public class LoginController {
                 } else if ("HouseKeeping Staff".equals(role)) {
                     // HouseKeeping Staff được điều hướng đến trang danh sách tasks
                     return "redirect:/tasks";
-                } else {
-                    // Role khác được điều hướng về trang chủ
+                } else if ("Manager".equals(role)) {
+                    return "redirect:/manager/homeManager";
+                }else {
                     return "redirect:/";
                 }
             } else {
@@ -72,7 +73,7 @@ public class LoginController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/";
+        return "redirect:/home";
     }
 }
 
