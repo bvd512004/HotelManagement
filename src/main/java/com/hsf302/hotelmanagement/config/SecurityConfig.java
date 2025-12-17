@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/index", "/booking", "/booking-details", 
                                 "/booking/complete", "/booking/success", "/login", "/logout",
                                 "/gallery", "/rooms", "/rooms/gallery", "/rooms/rooms").permitAll()
+                    .requestMatchers("/manager/**","/reservations/**","/rooms").hasRole("MANAGER")
                 
                 // Admin URLs - chỉ Admin
                 .requestMatchers("/users/**", "/rooms/list", "/rooms/create", 

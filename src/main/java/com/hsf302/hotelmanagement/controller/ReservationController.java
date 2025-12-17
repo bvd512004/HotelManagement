@@ -283,11 +283,10 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-
     @GetMapping("/manager/reservations-fragment")
-    public String showReservationList(@RequestParam(value = "filter", required = false, defaultValue = "all") String filter, Model model){
+    public String showReservationList(@RequestParam(value = "filter", required = false, defaultValue = "all") String filter, Model model) {
         List<Reservation> reservations;
-        if("today".equals(filter)){
+        if ("today".equals(filter)) {
             reservations = reservationService.getReservationForToday();
         } else if ("month".equals(filter)) {
             reservations = reservationService.getReservationForThisMonth();
@@ -297,36 +296,38 @@ public class ReservationController {
 
         List<overviewReservationDTO> reservationList = new ArrayList<>();
 
-        for(Reservation res : reservations){
-            for(Reservation_Room reservationRoom : res.getReservation_rooms()){
-                String guestName = res.getGuest().getFirstName() + " " + res.getGuest().getLastName();
-                String roomName = reservationRoom.getRoom().getRoomName();
-                double basePrice = reservationRoom.getRoom().getRoomType().getBasePrice();
+        for (Reservation res : reservations) {
+            if (res.getReservation_rooms() != null) {
+                for (Reservation_Room reservationRoom : res.getReservation_rooms()) {
+                    // Add more comprehensive null checks
+                    if (res.getGuest() != null && reservationRoom.getRoom() != null &&
+                        reservationRoom.getRoom().getRoomType() != null &&
+                        res.getCheckInDate() != null && res.getCheckOutDate() != null) {
+                        try {
+                            String guestName = res.getGuest().getFirstName() + " " + res.getGuest().getLastName();
+                            String roomName = reservationRoom.getRoom().getRoomName();
 
-                LocalDate in = res.getCheckInDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-                LocalDate out = res.getCheckOutDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-                long numberOfDays = ChronoUnit.DAYS.between(in, out);
-                if(numberOfDays <= 0) numberOfDays = 1;
-                double totalAmount = basePrice * numberOfDays;
-
-                // Create an instance of the new DTO
-                overviewReservationDTO dto = new overviewReservationDTO(
-                        res.getReservationId(),
-                        guestName,
-                        roomName,
-                        res.getCheckInDate(),
-                        res.getCheckOutDate(),
-                        res.getNumberOfGuests(),
-                        totalAmount
-                );
-                reservationList.add(dto);
+                            overviewReservationDTO dto = new overviewReservationDTO(
+                                    res.getReservationId(),
+                                    guestName,
+                                    roomName,
+                                    res.getCheckInDate(),
+                                    res.getCheckOutDate(),
+                                    res.getNumberOfGuests(),
+                                    res.getTotalAmount() // Use the total amount from the reservation object
+                            );
+                            reservationList.add(dto);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
         }
 
         model.addAttribute("resList", reservationList);
         model.addAttribute("filter", filter);
-
         return "manager/reservationList :: reservation-content";
     }
-}
 
+}

@@ -35,6 +35,13 @@ public class RoomType {
         this.rooms = rooms;
     }
 
+    public RoomType(String name, String description, double price, int capacity) {
+        this.typeName = name;
+        this.description = description;
+        this.basePrice = price;
+        this.capacity = capacity;
+    }
+
     public int getRoomTypeId() {
         return roomTypeId;
     }
