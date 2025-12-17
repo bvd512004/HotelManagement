@@ -251,22 +251,65 @@ public class ReceptionistController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
         try {
-            // Lấy danh sách reservations với status = Confirmed (đã check-in)
+            // Lấy danh sách reservations với status = Confirmed hoặc CheckedOut
             Page<Reservation> reservations;
             Pageable pageable = PageRequest.of(page, size);
 
             if (search != null && !search.isEmpty()) {
-                // Tìm kiếm theo tên khách
-                reservations = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
+                // Tìm kiếm theo tên khách cho cả Confirmed và CheckedOut
+                Page<Reservation> confirmed = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
                     "Confirmed", search, pageable);
+                Page<Reservation> checkedOut = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
+                    "CheckedOut", search, pageable);
+
+                // Merge both lists (simplified - trong thực tế nên dùng custom query)
+                java.util.List<Reservation> allReservations = new java.util.ArrayList<>();
+                allReservations.addAll(confirmed.getContent());
+                allReservations.addAll(checkedOut.getContent());
+
+                // Sort by reservation ID descending
+                allReservations.sort((a, b) -> Integer.compare(b.getReservationId(), a.getReservationId()));
+
+                // Create a Page object
+                int totalElements = (int) (confirmed.getTotalElements() + checkedOut.getTotalElements());
+                reservations = new org.springframework.data.domain.PageImpl<>(
+                    allReservations.stream().limit(size).collect(java.util.stream.Collectors.toList()),
+                    pageable,
+                    totalElements
+                );
             } else {
-                // Lấy tất cả reservations với status Confirmed
-                reservations = reservationRepository.findByStatus("Confirmed", pageable);
+                // Lấy tất cả reservations với status Confirmed hoặc CheckedOut
+                Page<Reservation> confirmed = reservationRepository.findByStatus("Confirmed", pageable);
+                Page<Reservation> checkedOut = reservationRepository.findByStatus("CheckedOut", pageable);
+
+                // Merge both lists
+                java.util.List<Reservation> allReservations = new java.util.ArrayList<>();
+                allReservations.addAll(confirmed.getContent());
+                allReservations.addAll(checkedOut.getContent());
+
+                // Sort by reservation ID descending
+                allReservations.sort((a, b) -> Integer.compare(b.getReservationId(), a.getReservationId()));
+
+                // Create a Page object
+                int totalElements = (int) (confirmed.getTotalElements() + checkedOut.getTotalElements());
+                reservations = new org.springframework.data.domain.PageImpl<>(
+                    allReservations.stream().limit(size).collect(java.util.stream.Collectors.toList()),
+                    pageable,
+                    totalElements
+                );
             }
 
             model.addAttribute("reservations", reservations);
             model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", reservations.getTotalPages());
+            model.addAttribute("pageSize", size);
+
+            // Tính totalPages chính xác
+            int totalElements = (int) reservations.getTotalElements();
+            int totalPages = (totalElements + size - 1) / size;  // Ceiling division
+            if (totalPages == 0) totalPages = 1;  // Tối thiểu 1 trang
+
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalElements", totalElements);
             model.addAttribute("pageTitle", "Danh Sách Check-out");
             model.addAttribute("activePage", "check-out");
         } catch (Exception e) {

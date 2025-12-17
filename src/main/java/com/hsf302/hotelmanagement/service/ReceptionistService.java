@@ -21,8 +21,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 @Service
 public class ReceptionistService {
@@ -173,29 +171,12 @@ public class ReceptionistService {
         Reservation res = reservation.get();
         res.setStatus("Confirmed");
 
-        // Cập nhật trạng thái của phòng thành "OCCUPIED" trong bảng room_statuss
+        // Cập nhật trạng thái của Reservation_Room thành "Occupied"
         List<Reservation_Room> rooms = res.getReservation_rooms();
         if (rooms != null && !rooms.isEmpty()) {
-            // Lấy Room_Status với status = "OCCUPIED"
-            Optional<com.hsf302.hotelmanagement.entity.Room_Status> occupiedStatus =
-                roomStatusRepository.findByRoomStatus("OCCUPIED");
-
-            if (!occupiedStatus.isPresent()) {
-                throw new BookingException("Không tìm thấy trạng thái OCCUPIED trong hệ thống");
-            }
-
-            com.hsf302.hotelmanagement.entity.Room_Status occupiedRoomStatus = occupiedStatus.get();
-
             for (Reservation_Room resRoom : rooms) {
                 resRoom.setStatus("Occupied");
                 reservationRoomRepository.save(resRoom);
-
-                // Cập nhật status của Room trong bảng rooms
-                com.hsf302.hotelmanagement.entity.Room actualRoom = resRoom.getRoom();
-                if (actualRoom != null) {
-                    actualRoom.setRoomStatus(occupiedRoomStatus);
-                    roomRepository.save(actualRoom);
-                }
             }
         }
 
@@ -218,29 +199,12 @@ public class ReceptionistService {
         Reservation res = reservation.get();
         res.setStatus("CheckedOut");
 
-        // Cập nhật trạng thái của phòng thành "AVAILABLE" trong bảng room_statuss
+        // Cập nhật trạng thái của Reservation_Room thành "Available"
         List<Reservation_Room> rooms = res.getReservation_rooms();
         if (rooms != null && !rooms.isEmpty()) {
-            // Lấy Room_Status với status = "AVAILABLE"
-            Optional<com.hsf302.hotelmanagement.entity.Room_Status> availableStatus =
-                roomStatusRepository.findByRoomStatus("AVAILABLE");
-
-            if (!availableStatus.isPresent()) {
-                throw new BookingException("Không tìm thấy trạng thái AVAILABLE trong hệ thống");
-            }
-
-            com.hsf302.hotelmanagement.entity.Room_Status availableRoomStatus = availableStatus.get();
-
             for (Reservation_Room room : rooms) {
                 room.setStatus("Available");
                 reservationRoomRepository.save(room);
-
-                // Cập nhật status của Room trong bảng rooms
-                com.hsf302.hotelmanagement.entity.Room actualRoom = room.getRoom();
-                if (actualRoom != null) {
-                    actualRoom.setRoomStatus(availableRoomStatus);
-                    roomRepository.save(actualRoom);
-                }
             }
         }
 
@@ -249,6 +213,7 @@ public class ReceptionistService {
 
     /**
      * Thêm dịch vụ vào đặt phòng và cập nhật tổng tiền
+     * Tổng tiền = (Giá phòng × Số đêm) + Tổng dịch vụ
      * @param reservationId ID của đặt phòng
      * @param serviceId ID của dịch vụ
      * @param quantity số lượng
@@ -281,13 +246,10 @@ public class ReceptionistService {
             }
         }
 
-        double additionalAmount = 0;
-
         if (existingService != null) {
             // Dịch vụ đã tồn tại → cập nhật quantity
-            additionalAmount = service.get().getPrice() * quantity;
             existingService.setQuantity(existingService.getQuantity() + quantity);
-            existingService.setPriceAtTheTime(existingService.getPriceAtTheTime() + additionalAmount);
+            existingService.setPriceAtTheTime(existingService.getPriceAtTheTime() + service.get().getPrice() * quantity);
             reservationServiceRepository.save(existingService);
         } else {
             // Dịch vụ chưa tồn tại → tạo mới
@@ -298,17 +260,18 @@ public class ReceptionistService {
             resService.setPriceAtTheTime(service.get().getPrice() * quantity);
 
             reservationServiceRepository.save(resService);
-            additionalAmount = service.get().getPrice() * quantity;
         }
 
-        // Cập nhật tổng tiền
-        res.setTotalAmount(res.getTotalAmount() + additionalAmount);
+        // CẬP NHẬT: Tính lại tổng tiền từ đầu (Phòng + Dịch vụ)
+        double totalAmount = calculateTotalAmount(res);
+        res.setTotalAmount(totalAmount);
 
         return reservationRepository.save(res);
     }
 
     /**
      * Thêm nhiều dịch vụ vào đặt phòng cùng một lúc
+     * Tổng tiền = (Giá phòng × Số đêm) + Tổng dịch vụ
      * @param reservationId ID của đặt phòng
      * @param servicesToAdd Map của serviceId -> quantity
      * @throws BookingException nếu có lỗi
@@ -321,7 +284,6 @@ public class ReceptionistService {
         }
 
         Reservation res = reservation.get();
-        double additionalAmount = 0;
 
         // Lấy danh sách dịch vụ hiện tại của reservation
         List<Reservation_Service> existingServices = res.getReservation_services();
@@ -350,11 +312,9 @@ public class ReceptionistService {
 
             if (existingService != null) {
                 // Dịch vụ đã tồn tại → cập nhật quantity
-                double serviceAmount = service.get().getPrice() * quantity;
                 existingService.setQuantity(existingService.getQuantity() + quantity);
-                existingService.setPriceAtTheTime(existingService.getPriceAtTheTime() + serviceAmount);
+                existingService.setPriceAtTheTime(existingService.getPriceAtTheTime() + service.get().getPrice() * quantity);
                 reservationServiceRepository.save(existingService);
-                additionalAmount += serviceAmount;
             } else {
                 // Dịch vụ chưa tồn tại → tạo mới
                 Reservation_Service resService = new Reservation_Service();
@@ -364,13 +324,14 @@ public class ReceptionistService {
                 resService.setPriceAtTheTime(service.get().getPrice() * quantity);
 
                 reservationServiceRepository.save(resService);
-                additionalAmount += service.get().getPrice() * quantity;
                 existingServices.add(resService);
             }
         }
 
-        // Cập nhật tổng tiền
-        res.setTotalAmount(res.getTotalAmount() + additionalAmount);
+        // CẬP NHẬT: Tính lại tổng tiền từ đầu (Phòng + Dịch vụ)
+        double totalAmount = calculateTotalAmount(res);
+        res.setTotalAmount(totalAmount);
+
         return reservationRepository.save(res);
     }
 
@@ -379,6 +340,54 @@ public class ReceptionistService {
      */
     public Optional<Reservation> getReservationDetails(Integer reservationId) {
         return reservationRepository.findById(reservationId);
+    }
+
+    /**
+     * Tính tổng tiền = (Giá phòng × Số đêm) + Tổng dịch vụ
+     * @param reservation đối tượng Reservation
+     * @return tổng tiền cần thanh toán
+     */
+    private double calculateTotalAmount(Reservation reservation) {
+        // Tính tiền phòng = BasePrice × Số đêm
+        double roomAmount = 0;
+        if (reservation.getReservation_rooms() != null && !reservation.getReservation_rooms().isEmpty()) {
+            long daysOfStay = getDaysOfStay(reservation.getCheckInDate(), reservation.getCheckOutDate());
+
+            for (Reservation_Room resRoom : reservation.getReservation_rooms()) {
+                com.hsf302.hotelmanagement.entity.RoomType roomType = resRoom.getRoom().getRoomType();
+                if (roomType != null) {
+                    roomAmount += roomType.getBasePrice() * daysOfStay;
+                }
+            }
+        }
+
+        // Tính tiền dịch vụ
+        double serviceAmount = 0;
+        if (reservation.getReservation_services() != null && !reservation.getReservation_services().isEmpty()) {
+            for (Reservation_Service resService : reservation.getReservation_services()) {
+                serviceAmount += resService.getPriceAtTheTime();
+            }
+        }
+
+        return roomAmount + serviceAmount;
+    }
+
+    /**
+     * Tính số đêm lưu trú
+     * @param checkInDate ngày nhận phòng
+     * @param checkOutDate ngày trả phòng
+     * @return số đêm lưu trú (tối thiểu 1 đêm)
+     */
+    private long getDaysOfStay(Date checkInDate, Date checkOutDate) {
+        if (checkInDate == null || checkOutDate == null) {
+            return 1; // Mặc định 1 đêm nếu thiếu dữ liệu
+        }
+
+        long diffInMillies = checkOutDate.getTime() - checkInDate.getTime();
+        long days = diffInMillies / (1000 * 60 * 60 * 24);
+
+        // Đảm bảo tối thiểu 1 đêm
+        return Math.max(1, days);
     }
 
     /**

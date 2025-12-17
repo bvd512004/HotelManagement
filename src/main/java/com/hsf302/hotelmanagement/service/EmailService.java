@@ -30,7 +30,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("ducbach512k4@gmail.com");
+            helper.setFrom("noreply@hotelmanagement.com");
             helper.setTo(to);
             helper.setSubject("Xác nhận đặt phòng - Mã đặt phòng: " + reservationId);
 

@@ -108,13 +108,30 @@
                             <td style="padding: 1rem;" th:text="${#dates.format(reservation.checkOutDate, 'dd/MM HH:mm')}"></td>
                             <td style="padding: 1rem; font-weight: 600;" th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA')} + '₫'"></td>
                             <td style="padding: 1rem; text-align: center;">
-                                <button type="button"
-                                        class="btn checkout-btn"
-                                        th:data-reservation-id="${reservation.reservationId}"
-                                        th:data-guest-name="${reservation.guest.fullName}"
-                                        style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 6px; font-weight: 600;">
-                                    🚪 Trả Phòng
-                                </button>
+                                <!-- Nếu status = Confirmed (Đã check-in) → Hiển thị nút "Trả Phòng" -->
+                                <th:block th:if="${reservation.status == 'Confirmed'}">
+                                    <button type="button"
+                                            class="btn checkout-btn"
+                                            th:data-reservation-id="${reservation.reservationId}"
+                                            th:data-guest-name="${reservation.guest.fullName}"
+                                            style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 6px; font-weight: 600;">
+                                        🚪 Trả Phòng
+                                    </button>
+                                </th:block>
+
+                                <!-- Nếu status = CheckedOut (Đã hoàn thành) → Hiển thị badge "Đã Hoàn Thành" -->
+                                <th:block th:if="${reservation.status == 'CheckedOut'}">
+                                    <button type="button"
+                                            disabled
+                                            style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: default; opacity: 0.8;">
+                                        ✓ Đã Hoàn Thành
+                                    </button>
+                                </th:block>
+
+                                <!-- Nếu status khác (Pending, v.v.) → Không hiển thị nút -->
+                                <th:block th:unless="${reservation.status == 'Confirmed' || reservation.status == 'CheckedOut'}">
+                                    <span style="color: #999; font-size: 0.9rem;">Chưa sẵn sàng</span>
+                                </th:block>
                             </td>
                         </tr>
                     </tbody>
@@ -122,12 +139,23 @@
             </div>
 
             <!-- Pagination -->
-            <div th:if="${totalPages > 1}" style="margin-top: 20px; display: flex; justify-content: center; gap: 5px;">
-                <a th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
-                   th:href="@{/receptionist/check-out(page=${page})}"
-                   th:text="${page + 1}"
-                   th:classappend="${page == currentPage} ? 'active' : ''"
-                   style="padding: 0.5rem 0.8rem; text-decoration: none; border-radius: 4px; font-weight: 600; border: 1px solid #ddd;"></a>
+            <div style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <a th:if="${currentPage > 0}" th:href="@{/receptionist/check-out(page=${currentPage - 1}, size=${pageSize}, search=${search})}" style="padding: 0.7rem 1rem; text-decoration: none; border-radius: 6px; border: 1px solid #ddd; background: #20b2aa; color: white; font-weight: 600; cursor: pointer;">← Trước</a>
+                <span th:if="${currentPage == 0}" style="padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid #ddd; color: #999; font-weight: 600;">← Trước</span>
+
+                <span style="padding: 0.7rem 1rem; border: none; font-weight: 600; color: #333; white-space: nowrap;">Trang <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span> | Tổng: <span th:text="${totalElements}"></span> bản ghi</span>
+
+                <a th:if="${currentPage < totalPages - 1}" th:href="@{/receptionist/check-out(page=${currentPage + 1}, size=${pageSize}, search=${search})}" style="padding: 0.7rem 1rem; text-decoration: none; border-radius: 6px; border: 1px solid #ddd; background: #20b2aa; color: white; font-weight: 600; cursor: pointer;">Sau →</a>
+                <span th:if="${currentPage == totalPages - 1}" style="padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid #ddd; color: #999; font-weight: 600;">Sau →</span>
+
+                <form method="get" action="/receptionist/check-out" style="display: inline; margin: 0;">
+                    <input type="hidden" name="search" th:value="${search}">
+                    <select name="size" onchange="this.form.submit();" style="padding: 0.7rem 1rem; background: #20b2aa; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        <option value="10" th:selected="${pageSize == 10}">10 bản ghi</option>
+                        <option value="15" th:selected="${pageSize == 15}">15 bản ghi</option>
+                        <option value="20" th:selected="${pageSize == 20}">20 bản ghi</option>
+                    </select>
+                </form>
             </div>
         </main>
 

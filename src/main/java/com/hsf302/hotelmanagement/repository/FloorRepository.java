@@ -13,3 +13,4 @@ public interface FloorRepository extends JpaRepository<Floor, Integer> {
     @Query("SELECT f FROM Floor f WHERE f.floorNumber = :floorNumber")
     Optional<Floor> findFirstByFloorNumber(@Param("floorNumber") int floorNumber);
 }
+

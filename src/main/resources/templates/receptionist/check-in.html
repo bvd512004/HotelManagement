@@ -610,18 +610,18 @@
                                 </td>
                                 <td class="price" th:unless="${reservation.checkInDate != null && reservation.checkOutDate != null}">N/A</td>
 
-                                <!-- Giá tiền/ngày = TotalAmount / số ngày -->
+                                <!-- Giá tiền/ngày = BasePrice của phòng -->
                                 <td class="price"
-                                    th:if="${reservation.checkInDate != null && reservation.checkOutDate != null}"
-                                    th:with="days=${(reservation.checkOutDate.time - reservation.checkInDate.time) / (1000 * 60 * 60 * 24)},
-                                            pricePerDay=${days > 0 ? reservation.totalAmount / days : reservation.totalAmount}"
-                                    th:text="${#numbers.formatInteger(pricePerDay, 0, 'COMMA') + '₫'}">
+                                    th:if="${!reservation.reservation_rooms.isEmpty()}"
+                                    th:with="basePrice=${reservation.reservation_rooms.get(0).room.roomType.basePrice}"
+                                    th:text="${#numbers.formatInteger(basePrice, 0, 'COMMA') + '₫'}">
                                 </td>
-                                <td class="price" th:unless="${reservation.checkInDate != null && reservation.checkOutDate != null}">N/A</td>
+                                <td class="price" th:unless="${!reservation.reservation_rooms.isEmpty()}">N/A</td>
 
-                                <!-- Tổng cộng -->
+                                <!-- Tổng cộng = totalAmount từ database (phòng + dịch vụ) -->
                                 <td class="price"
-                                    th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA') + '₫'}"></td>
+                                    th:text="${#numbers.formatInteger(reservation.totalAmount, 0, 'COMMA') + '₫'}">
+                                </td>
                                 <td>
                                     <div class="action-buttons">
                                         <!-- Nếu status = Pending (Chưa Check-in) -->
@@ -801,13 +801,13 @@
                     break;
                 case 'week':
                     fromDate = new Date(today);
-                    fromDate.setDate(today.getDate() - 7);
                     toDate = new Date(today);
+                    toDate.setDate(today.getDate() + 7);
                     break;
                 case 'month':
                     fromDate = new Date(today);
-                    fromDate.setDate(today.getDate() - 30);
                     toDate = new Date(today);
+                    toDate.setDate(today.getDate() + 30);
                     break;
             }
 
