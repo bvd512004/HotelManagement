@@ -55,8 +55,9 @@ public class LoginController {
                 } else if ("HouseKeeping Staff".equals(role)) {
                     // HouseKeeping Staff được điều hướng đến trang danh sách tasks
                     return "redirect:/tasks";
-                } else {
-                    // Role khác được điều hướng về trang chủ
+                } else if ("Manager".equals(role)) {
+                    return "redirect:/manager/homeManager";
+                }else {
                     return "redirect:/";
                 }
             } else {

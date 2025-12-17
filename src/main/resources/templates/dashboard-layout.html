@@ -69,10 +69,8 @@
         </div>
         <ul class="sidebar-menu">
             <li><a th:href="@{/rooms/list}" th:classappend="${activePage == 'room-list'} ? 'active'">Rooms Layout</a></li>
-            <li><a th:href="@{/receptionist/check-in}" th:classappend="${activePage == 'check-in'} ? 'active'">Check-in</a></li>
-            <li><a th:href="@{/receptionist/check-out}" th:classappend="${activePage == 'check-out'} ? 'active'">Check-out</a></li>
             <li><a th:href="@{/users}" th:classappend="${activePage == 'user-list'} ? 'active'">Manage User</a></li>
-            <li><a th:href="@{/tasks-management/assign}" th:classappend="${activePage == 'task-assign'} ? 'active'">Assign Task</a></li>
+
         </ul>
     </aside>
 

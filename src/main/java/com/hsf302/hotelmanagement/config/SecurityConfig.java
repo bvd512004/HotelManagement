@@ -85,7 +85,7 @@ public class SecurityConfig {
                     String role = (String) session.getAttribute("role");
                     
                     if (user != null && role != null) {
-                        // Chuyển đổi role để phù hợp với Spring Security
+
                         String springSecurityRole = convertRoleToSpringSecurityRole(role);
                         
                         // Tạo authentication object và đưa vào SecurityContext
