@@ -49,23 +49,36 @@ public class ReceptionistController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        // Mặc định filter ngày hôm nay nếu không có fromDate/toDate
-        String today = LocalDate.now().toString();
-        if (fromDate == null || fromDate.isEmpty()) {
-            fromDate = today;
-        }
-        if (toDate == null || toDate.isEmpty()) {
-            toDate = today;
-        }
-
         // Xác định status dựa trên tab
-        // "pending" → "Pending", "checked" → "Confirmed"
         String status = "pending".equals(tab) ? "Pending" : "Confirmed";
 
-        // Gọi service với date range và status
-        Page<Reservation> reservations = receptionistService.getReservationsByDateRange(
-            searchTerm, fromDate, toDate, status, pageable
-        );
+        Page<Reservation> reservations;
+
+        // Nếu không có fromDate và toDate, hiển thị tất cả
+        if ((fromDate == null || fromDate.isEmpty()) && (toDate == null || toDate.isEmpty())) {
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                // Không có search term và không có date range → hiển thị tất cả
+                reservations = reservationRepository.findByStatus(status, pageable);
+            } else {
+                // Có search term nhưng không có date range → tìm theo tên trong tất cả
+                reservations = reservationRepository.findByStatusAndGuestFullNameContainingIgnoreCase(
+                    status, searchTerm.trim(), pageable);
+            }
+        } else {
+            // Có date range → dùng logic cũ với date range
+            String today = LocalDate.now().toString();
+            if (fromDate == null || fromDate.isEmpty()) {
+                fromDate = today;
+            }
+            if (toDate == null || toDate.isEmpty()) {
+                toDate = today;
+            }
+
+            reservations = receptionistService.getReservationsByDateRange(
+                searchTerm, fromDate, toDate, status, pageable
+            );
+        }
+
 
         model.addAttribute("reservations", reservations.getContent());
         model.addAttribute("currentPage", page);
@@ -73,8 +86,8 @@ public class ReceptionistController {
         model.addAttribute("totalPages", reservations.getTotalPages());
         model.addAttribute("totalElements", reservations.getTotalElements());
         model.addAttribute("searchTerm", searchTerm);
-        model.addAttribute("fromDate", fromDate);
-        model.addAttribute("toDate", toDate);
+        model.addAttribute("fromDate", fromDate != null ? fromDate : "");
+        model.addAttribute("toDate", toDate != null ? toDate : "");
         model.addAttribute("tab", tab);
 
         return "receptionist/check-in";

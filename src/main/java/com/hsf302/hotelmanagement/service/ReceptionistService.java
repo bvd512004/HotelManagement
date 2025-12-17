@@ -171,11 +171,11 @@ public class ReceptionistService {
         Reservation res = reservation.get();
         res.setStatus("Confirmed");
 
-        // Cập nhật trạng thái của Reservation_Room thành "Occupied"
+        // Cập nhật trạng thái của Reservation_Room thành "CheckedIn"
         List<Reservation_Room> rooms = res.getReservation_rooms();
         if (rooms != null && !rooms.isEmpty()) {
             for (Reservation_Room resRoom : rooms) {
-                resRoom.setStatus("Occupied");
+                resRoom.setStatus("CheckedIn");
                 reservationRoomRepository.save(resRoom);
             }
         }
@@ -199,11 +199,11 @@ public class ReceptionistService {
         Reservation res = reservation.get();
         res.setStatus("CheckedOut");
 
-        // Cập nhật trạng thái của Reservation_Room thành "Available"
+        // Cập nhật trạng thái của Reservation_Room thành "CheckedOut"
         List<Reservation_Room> rooms = res.getReservation_rooms();
         if (rooms != null && !rooms.isEmpty()) {
             for (Reservation_Room room : rooms) {
-                room.setStatus("Available");
+                room.setStatus("CheckedOut");
                 reservationRoomRepository.save(room);
             }
         }
