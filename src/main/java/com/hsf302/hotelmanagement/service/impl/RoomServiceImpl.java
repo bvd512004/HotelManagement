@@ -81,6 +81,7 @@ public class RoomServiceImpl implements RoomService {
         return floorRepository.findById(id).orElse(null);
     }
 
+
     @Override
     public List<Room> findAllWithRelations() {
         List<Room> rList =new ArrayList<>();

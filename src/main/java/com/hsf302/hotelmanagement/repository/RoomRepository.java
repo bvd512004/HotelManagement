@@ -71,4 +71,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
                                                  @Param("checkInDate") Date checkInDate,
                                                  @Param("checkOutDate") Date checkOutDate,
                                                  Pageable pageable);
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.roomStatus JOIN FETCH r.floor")
+    List<Room> findAllWithRelations();
 }
