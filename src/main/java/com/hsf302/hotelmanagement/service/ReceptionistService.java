@@ -174,9 +174,25 @@ public class ReceptionistService {
         // Cập nhật trạng thái của Reservation_Room thành "CheckedIn"
         List<Reservation_Room> rooms = res.getReservation_rooms();
         if (rooms != null && !rooms.isEmpty()) {
-            for (Reservation_Room resRoom : rooms) {
-                resRoom.setStatus("CheckedIn");
-                reservationRoomRepository.save(resRoom);
+            // Lấy Room_Status OCCUPIED từ database
+            Optional<com.hsf302.hotelmanagement.entity.Room_Status> occupiedStatus =
+                roomStatusRepository.findByRoomStatus("OCCUPIED");
+
+            if (occupiedStatus.isPresent()) {
+                for (Reservation_Room resRoom : rooms) {
+                    // Cập nhật Reservation_Room status
+                    resRoom.setStatus("CheckedIn");
+                    reservationRoomRepository.save(resRoom);
+
+                    // Cập nhật Room status thành OCCUPIED
+                    com.hsf302.hotelmanagement.entity.Room room = resRoom.getRoom();
+                    if (room != null) {
+                        room.setRoomStatus(occupiedStatus.get());
+                        roomRepository.save(room);
+                    }
+                }
+            } else {
+                throw new BookingException("Không tìm thấy trạng thái phòng OCCUPIED trong hệ thống");
             }
         }
 
@@ -202,9 +218,25 @@ public class ReceptionistService {
         // Cập nhật trạng thái của Reservation_Room thành "CheckedOut"
         List<Reservation_Room> rooms = res.getReservation_rooms();
         if (rooms != null && !rooms.isEmpty()) {
-            for (Reservation_Room room : rooms) {
-                room.setStatus("CheckedOut");
-                reservationRoomRepository.save(room);
+            // Lấy Room_Status DIRTY từ database
+            Optional<com.hsf302.hotelmanagement.entity.Room_Status> dirtyStatus =
+                roomStatusRepository.findByRoomStatus("DIRTY");
+
+            if (dirtyStatus.isPresent()) {
+                for (Reservation_Room resRoom : rooms) {
+                    // Cập nhật Reservation_Room status
+                    resRoom.setStatus("CheckedOut");
+                    reservationRoomRepository.save(resRoom);
+
+                    // Cập nhật Room status thành DIRTY
+                    com.hsf302.hotelmanagement.entity.Room room = resRoom.getRoom();
+                    if (room != null) {
+                        room.setRoomStatus(dirtyStatus.get());
+                        roomRepository.save(room);
+                    }
+                }
+            } else {
+                throw new BookingException("Không tìm thấy trạng thái phòng DIRTY trong hệ thống");
             }
         }
 
