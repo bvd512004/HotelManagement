@@ -27,7 +27,7 @@ public class Floor {
     }
 
     public Floor(int floor_number) {
-        this.floor_number = floor_number;
+        this.floorNumber = floor_number;
     }
 
     public int getFloorId() {

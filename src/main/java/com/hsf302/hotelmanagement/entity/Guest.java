@@ -13,10 +13,10 @@ public class Guest {
     @Column(name="GuestId")
     private int guestId;
 
-    @Column(name="FirstName",columnDefinition = "Nvarchar")
+    @Column(name="FirstName",columnDefinition = "Nvarchar(50)")
     private String firstName;
 
-    @Column(name="LastName",columnDefinition = "Nvarchar")
+    @Column(name="LastName",columnDefinition = "Nvarchar(50)")
     private String lastName;
 
     @Column(name="Email", unique=true, nullable=false)
@@ -25,7 +25,7 @@ public class Guest {
     @Column(name="PhoneNumber", length=10, nullable=false)
     private String phoneNumber;
 
-    @Column(name="Address",columnDefinition = "Nvarchar")
+    @Column(name="Address",columnDefinition = "Nvarchar(50)")
     private String address;
 
     @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)

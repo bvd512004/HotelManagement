@@ -47,8 +47,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             "JOIN FETCH r.reservation_rooms rr " +
             "JOIN FETCH rr.room room " +
             "JOIN FETCH room.roomType " +
-            "WHERE r.checkInDate = :date")
-    List<Reservation> findReservationsTodayWithDetails(@Param("date") Date date);
+            "WHERE r.checkInDate < :startOfTomorrow AND r.checkOutDate >= :startOfToday")
+    List<Reservation> findReservationsTodayWithDetails(@Param("startOfToday") Date startOfToday, @Param("startOfTomorrow") Date startOfTomorrow);
 
     @Query("SELECT r FROM Reservation r " +
             "JOIN FETCH r.guest " +

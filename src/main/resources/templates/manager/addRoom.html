@@ -1,25 +1,39 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="add-room-form">
+<div th:fragment="add-room-form" class="form-container">
     <h1>Add New Room</h1>
-    <form action="/manager/add-room" method="post">
-        Number: <input type="text" name="name" required="" placeholder="New room number">
-        Type: <select name="type" required="">
-        <option value="">-- Select Room Type --</option>
-        <option th:each="rt : ${rtList}"
-                th:value="${rt.typeName}"
-                th:text="${rt.typeName}"></option>
-    </select>
-        Floor: <select name="floor" required="">
-        <option value="">-- Select Floor --</option>
-        <option th:each="f : ${fList}"
-                th:value="${f.floor_number}"
-                th:text="${f.floor_number}"></option>
-    </select>
-        <span th:text="${mess}" style="color: red;font-size: larger;font-weight: bold;"></span>
-        <input type="submit" value="Add">
-        <button type="button" onclick="loadContent('/manager/rooms-fragment')">Back</button>
+    <form th:action="@{/rooms/manager/add-room}" method="post">
+        <div class="form-group">
+            <label for="name">Number:</label>
+            <input type="text" id="name" name="name" required placeholder="New room number">
+        </div>
+
+        <div class="form-group">
+            <label for="type">Type:</label>
+            <select id="type" name="type" required>
+                <option value="">-- Select Room Type --</option>
+                <option th:each="rt : ${rtList}"
+                        th:value="${rt.typeName}"
+                        th:text="${rt.typeName}"></option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="floor">Floor:</label>
+            <select id="floor" name="floor" required>
+                <option value="">-- Select Floor --</option>
+                <option th:each="f : ${fList}"
+                        th:value="${f.floorNumber}"
+                        th:text="${f.floorNumber}"></option>
+            </select>
+        </div>
+
+        <span th:if="${mess}" th:text="${mess}" class="error-message"></span>
+
+        <div class="button-group">
+            <input type="submit" value="Add">
+        </div>
     </form>
 </div>
 </body>

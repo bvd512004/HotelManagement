@@ -30,11 +30,6 @@ public class RoomController {
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 
-    @GetMapping("/manager/homeManager")
-    public String managerHome() {
-        return "manager/homeManager";
-    }
-
     // --- Fragment Loading Endpoints (GET) ---
 
     @GetMapping("/manager/rooms-fragment")
@@ -64,7 +59,7 @@ public class RoomController {
         model.addAttribute("room", room);
         model.addAttribute("rtList", roomService.findAllRoomTypes());
         model.addAttribute("rto", room.getRoomType().getTypeName());
-        model.addAttribute("fno", room.getFloor().getFloor_number());
+        model.addAttribute("fno", room.getFloor().getFloorNumber());
         return "manager/editRoom :: edit-room-form";
     }
 
@@ -150,10 +145,10 @@ public class RoomController {
     }
 
     @PostMapping("/manager/delete-room")
-    public String deleteRoom(@RequestParam("id") int id, RedirectAttributes redirectAttributes) {
+    public String deleteRoom(@RequestParam("id") int id, Model model) {
         roomService.deleteRoom(id);
-        redirectAttributes.addFlashAttribute("mess", "Delete successfully");
-        return "redirect:/manager/homeManager";
+        model.addAttribute("mess", "Delete successfully");
+        return getRoomsFragment(model);
     }
 
     @GetMapping("/viewRoomsByManager")

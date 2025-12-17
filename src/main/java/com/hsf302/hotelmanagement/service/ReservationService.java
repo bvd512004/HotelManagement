@@ -1,9 +1,10 @@
 package com.hsf302.hotelmanagement.service;
 
 import com.hsf302.hotelmanagement.entity.Reservation;
-import java.util.List;
-import com.hsf302.hotelmanagement.entity.*;
+import com.hsf302.hotelmanagement.entity.Service;
+
 import java.util.Date;
+import java.util.List;
 
 public interface ReservationService {
     Reservation save(Reservation reservation);
@@ -13,7 +14,12 @@ public interface ReservationService {
     List<Reservation> findByGuestId(int guestId);
     List<Service> getAllServices();
     List<Reservation> findConflictingReservations(int roomId, Date checkIn, Date checkOut);
-    List<Reservation> getReservationForToday();
     List<Reservation> getReservationForThisMonth();
+    List<Reservation> getReservationForToday();
     List<Reservation> getAllReservations();
+
+    // Updated methods for Overview with filter
+    double calculateTotalRoomAmount(String filter);
+    double calculateTotalServiceAmount(String filter);
+    double calculateTotalIncome(String filter);
 }

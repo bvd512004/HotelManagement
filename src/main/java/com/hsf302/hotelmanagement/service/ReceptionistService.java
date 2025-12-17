@@ -3,17 +3,12 @@ package com.hsf302.hotelmanagement.service;
 import com.hsf302.hotelmanagement.entity.Reservation;
 import com.hsf302.hotelmanagement.entity.Reservation_Room;
 import com.hsf302.hotelmanagement.entity.Reservation_Service;
+import com.hsf302.hotelmanagement.entity.Service;
 import com.hsf302.hotelmanagement.exception.BookingException;
-import com.hsf302.hotelmanagement.repository.ReservationRepository;
-import com.hsf302.hotelmanagement.repository.ReservationRoomRepository;
-import com.hsf302.hotelmanagement.repository.ReservationServiceRepository;
-import com.hsf302.hotelmanagement.repository.ServiceRepository;
-import com.hsf302.hotelmanagement.repository.RoomRepository;
-import com.hsf302.hotelmanagement.repository.Room_StatusRepository;
+import com.hsf302.hotelmanagement.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -21,10 +16,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
-@Service
+@org.springframework.stereotype.Service
 public class ReceptionistService {
 
     @Autowired
@@ -43,7 +36,7 @@ public class ReceptionistService {
     private RoomRepository roomRepository;
 
     @Autowired
-    private Room_StatusRepository roomStatusRepository;
+    private RoomStatusRepository roomStatusRepository;
 
     /**
      * Lấy danh sách reservations theo date range và status
@@ -334,7 +327,7 @@ public class ReceptionistService {
             Integer serviceId = entry.getKey();
             Integer quantity = entry.getValue();
 
-            Optional<com.hsf302.hotelmanagement.entity.Service> service = serviceRepository.findById(serviceId);
+            Optional<Service> service = serviceRepository.findById(serviceId);
             if (!service.isPresent()) {
                 throw new BookingException("Không tìm thấy dịch vụ với ID: " + serviceId);
             }
@@ -397,4 +390,3 @@ public class ReceptionistService {
         return roomRepository.findByRoomStatus(occupiedStatus.get());
     }
 }
-

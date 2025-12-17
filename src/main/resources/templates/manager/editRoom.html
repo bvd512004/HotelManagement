@@ -1,23 +1,39 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="edit-room-form">
+<div th:fragment="edit-room-form" class="form-container">
     <h1>Edit Room</h1>
-    <form action="/manager/edit-room" method="post">
+    <form th:action="@{/rooms/manager/edit-room}" method="post">
         <input type="hidden" name="id" th:value="${room.roomId}">
-        Number: <input type="text" name="name" th:value="${room.roomName}" readonly="">
-        Type: <select name="type" required="">
-        <option th:value="${rto}" th:text="${rto}"></option>
-        <option th:each="rt : ${rtList}"
-                th:value="${rt.typeName}"
-                th:text="${rt.typeName}"></option>
-    </select>
-        Floor: <select name="floor" disabled>
-        <option th:value="${fno}" th:text="${fno}"></option>
-    </select>
-        <span th:text="${mess}" style="color: red;font-size: larger;font-weight: bold;"></span>
-        <input type="submit" value="Save">
-        <button type="button" onclick="loadContent('/manager/rooms-fragment')">Back</button>
+
+        <div class="form-group">
+            <label for="name">Number:</label>
+            <input type="text" id="name" name="name" th:value="${room.roomName}" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="type">Type:</label>
+            <select id="type" name="type" required>
+                <option th:value="${rto}" th:text="${rto}"></option>
+                <option th:each="rt : ${rtList}"
+                        th:value="${rt.typeName}"
+                        th:text="${rt.typeName}"></option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="floor">Floor:</label>
+            <select id="floor" name="floor" disabled>
+                <option th:value="${fno}" th:text="${fno}"></option>
+            </select>
+        </div>
+
+        <span th:if="${mess}" th:text="${mess}" class="error-message"></span>
+
+        <div class="button-group">
+            <input type="submit" value="Save">
+            <button type="button" th:onclick="|loadContent('@{/rooms/manager/rooms-fragment}')" class="btn-secondary">Back</button>
+        </div>
     </form>
 </div>
 </body>

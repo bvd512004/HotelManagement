@@ -36,15 +36,15 @@
             <li><strong>Number:</strong> <span th:text="${room.roomName}"></span></li>
             <li><strong>Type:</strong> <span th:text="${room.roomType.typeName}"></span></li>
         </ul>
-        <form th:action="@{/manager/delete-room}" method="post" style="display: inline;">
+        <form th:action="@{/rooms/manager/delete-room}" method="post" style="display: inline;">
             <input type="hidden" name="id" th:value="${room.roomId}" />
             <button type="submit" class="btn btn-danger">Yes, Delete</button>
         </form>
-        <a th:href="@{/manager/homeManager}" class="btn btn-secondary">No, Go Back</a>
+        <button type="button" class="btn btn-secondary" th:onclick="|loadContent('@{/rooms/manager/rooms-fragment}')|">No, Go Back</button>
     </div>
     <div th:if="${room == null}">
         <p>Room not found.</p>
-        <a th:href="@{/manager/homeManager}" class="btn btn-secondary">Go Back</a>
+        <button type="button" class="btn btn-secondary" th:onclick="|loadContent('@{/rooms/manager/rooms-fragment}')|">Go Back</button>
     </div>
 </body>
 </html>

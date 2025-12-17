@@ -27,6 +27,8 @@ public class Reservation_Service {
     @Column(name="PriceAtTheTime")
     private double priceAtTheTime;
 
+    // The serviceDate field has been removed as requested.
+
     public Reservation_Service() {
     }
 

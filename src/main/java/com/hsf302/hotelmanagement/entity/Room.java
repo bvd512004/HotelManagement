@@ -13,7 +13,7 @@ public class Room {
     @Column(name="RoomId")
     private int roomId;
 
-    @Column(name="RoomName",columnDefinition = "Nvarchar")
+    @Column(name="RoomName", columnDefinition = "NVARCHAR(50)")
     private String roomName;
 
     @ManyToOne(fetch = FetchType.LAZY)

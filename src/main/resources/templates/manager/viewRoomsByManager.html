@@ -3,7 +3,7 @@
 <body>
 <div id="room-list-fragment" th:fragment="room-list">
     <h1>Room Occupancy Report</h1>
-    <form th:action="@{/manager/search-room}" method="post">
+    <form th:action="@{/rooms/manager/search-room}" method="post">
         Number: <input type="text" name="name" placeholder="Search by number">
         Type: <select name="type">
         <option value="">-- Select Room Type --</option>
@@ -12,7 +12,7 @@
                 th:text="${rt.typeName}"></option>
     </select>
         <input type="submit" value="Search">
-        <button type="button" onclick="loadContent('/manager/rooms-fragment')">Reset</button>
+        <button type="button" th:onclick="|loadContent('@{/rooms/manager/rooms-fragment}')|">Reset</button>
     </form>
     <span th:text="${mess}" style="color: red;font-size: larger;font-weight: bold;"></span>
 
@@ -31,9 +31,9 @@
             <td th:text="${room.roomName}"></td>
             <td th:text="${room.roomType.typeName}"></td>
             <td th:text="${room.roomStatus.roomStatus}"></td>
-            <td th:text="${room.floor.floor_number}"></td>
-            <td><a href="#" th:attr="data-url=@{/manager/edit-room-fragment(id=${room.roomId})}">Edit</a></td>
-            <td><a th:href="@{/manager/confirm-delete(id=${room.roomId})}">Delete</a></td>
+            <td th:text="${room.floor.floorNumber}"></td>
+            <td><a href="#" th:onclick="|loadContent('@{/rooms/manager/edit-room-fragment(id=${room.roomId})}')|">Edit</a></td>
+            <td><a href="#" th:onclick="|loadContent('@{/rooms/manager/confirm-delete(id=${room.roomId})}')|">Delete</a></td>
         </tr>
         </tbody>
     </table>

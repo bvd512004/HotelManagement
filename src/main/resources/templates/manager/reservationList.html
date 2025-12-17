@@ -5,14 +5,15 @@
 <div th:fragment="reservation-content">
     <h1>Reservation List</h1>
     <div class="filter-buttons">
-        <button type="button" th:onclick="|loadContent('@{/manager/reservations-fragment(filter='today')}')|" class="menu-item" th:classappend="${filter == 'today'} ? 'active' : ''">Today</button>
-        <button type="button" th:onclick="|loadContent('@{/manager/reservations-fragment(filter='month')}')|" class="menu-item" th:classappend="${filter == 'month'} ? 'active' : ''">This Month</button>
-        <button type="button" th:onclick="|loadContent('@{/manager/reservations-fragment(filter='all')}')|" class="menu-item" th:classappend="${filter == 'all'} ? 'active' : ''">All</button>
+        <button type="button" th:onclick="|loadContent('@{/reservations/manager/reservations-fragment(filter='today')}')|" th:classappend="${filter == 'today'} ? 'active' : ''">Today</button>
+        <button type="button" th:onclick="|loadContent('@{/reservations/manager/reservations-fragment(filter='month')}')|" th:classappend="${filter == 'month'} ? 'active' : ''">This Month</button>
+        <button type="button" th:onclick="|loadContent('@{/reservations/manager/reservations-fragment(filter='all')}')|" th:classappend="${filter == 'all'} ? 'active' : ''">All</button>
     </div>
 
     <table border="1px" style="width: 100%; margin-top: 20px;">
         <thead>
         <tr>
+            <th>Id</th>
             <th>Room number</th>
             <th>Guest name</th>
             <th>Check-in Date</th>
@@ -23,6 +24,7 @@
         </thead>
         <tbody>
         <tr th:each="res : ${resList}">
+            <td th:text="${res.reservationId}"></td>
             <td th:text="${res.roomName}"></td>
             <td th:text="${res.guestName}"></td>
             <td th:text="${#dates.format(res.checkInDate, 'yyyy-MM-dd')}"></td>
