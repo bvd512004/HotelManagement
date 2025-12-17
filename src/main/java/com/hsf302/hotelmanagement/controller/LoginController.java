@@ -2,6 +2,7 @@ package com.hsf302.hotelmanagement.controller;
 
 import com.hsf302.hotelmanagement.entity.User;
 import com.hsf302.hotelmanagement.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,7 +32,7 @@ public class LoginController {
     public String processLogin(
             @RequestParam String username,
             @RequestParam String password,
-            HttpSession session,
+            HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
         
         try {
@@ -39,6 +40,7 @@ public class LoginController {
             
             if (user != null && user.getPassword().equals(password)) {
                 // Đăng nhập thành công - lưu user và role vào session
+                HttpSession session = request.getSession(true); // Tạo session mới hoặc lấy session hiện có
                 session.setAttribute("user", user);
                 session.setAttribute("role", user.getRole());
                 

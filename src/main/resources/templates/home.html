@@ -123,6 +123,37 @@
             transform: translateY(-2px);
         }
 
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .user-name {
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .logout-btn {
+            background: transparent;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
         /* Hero Section */
         .hero {
             background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
@@ -328,7 +359,15 @@
                 <li><a th:href="@{/rooms}">Hạng phòng</a></li>
             </ul>
             <div class="nav-buttons">
-                <a th:href="@{/login}" class="login-btn">Đăng nhập</a>
+                <!-- Hiển thị nút đăng nhập nếu chưa đăng nhập -->
+                <a th:href="@{/login}" class="login-btn" th:if="${user == null}">Đăng nhập</a>
+                
+                <!-- Hiển thị thông tin user và nút đăng xuất nếu đã đăng nhập -->
+                <div class="user-info" th:if="${user != null}">
+                    <span class="user-name" th:text="${user.userName}">User</span>
+                    <a th:href="@{/logout}" class="logout-btn">Đăng xuất</a>
+                </div>
+                
                 <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
             </div>
         </nav>
