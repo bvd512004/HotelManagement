@@ -513,6 +513,7 @@
                 <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
                 <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
+
                 <!-- Tab Navigation -->
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 0;">
                     <a href="/receptionist/check-in?tab=pending"
@@ -534,6 +535,7 @@
                 <!-- Filter Section -->
                 <form method="get" action="/receptionist/check-in">
                     <input type="hidden" name="tab" th:value="${param.tab ?: 'pending'}">
+                    <input type="hidden" name="page" value="0">
 
                     <div class="filter-section">
                         <div class="filter-group" style="flex: 1; min-width: 250px;">
@@ -650,19 +652,37 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="pagination" th:if="${!#lists.isEmpty(reservations)}">
-                    <a th:if="${currentPage > 0}" th:href="@{/receptionist/check-in(page=${currentPage - 1}, size=${pageSize}, search=${searchTerm}, dateRange=${dateRange})}">← Trước</a>
+                <div class="pagination" th:if="${totalElements > 0}">
+                    <!-- Previous Button -->
+                    <a th:if="${currentPage > 0}"
+                       th:href="@{/receptionist/check-in(page=${currentPage - 1}, size=${pageSize}, search=${searchTerm}, fromDate=${fromDate}, toDate=${toDate}, tab=${tab})}">
+                        ← Trước
+                    </a>
                     <span th:if="${currentPage == 0}" class="pagination-disabled">← Trước</span>
 
-                    <span>Trang <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span> | Tổng: <span th:text="${totalElements}"></span> bản ghi</span>
+                    <!-- Page Info -->
+                    <span>
+                        Trang <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span> |
+                        Tổng: <span th:text="${totalElements}"></span> bản ghi
+                    </span>
 
-                    <a th:if="${currentPage < totalPages - 1}" th:href="@{/receptionist/check-in(page=${currentPage + 1}, size=${pageSize}, search=${searchTerm}, dateRange=${dateRange})}">Sau →</a>
-                    <span th:if="${currentPage == totalPages - 1}" class="pagination-disabled">Sau →</span>
+                    <!-- Next Button -->
+                    <a th:if="${totalPages > 1 && currentPage < totalPages - 1}"
+                       th:href="@{/receptionist/check-in(page=${currentPage + 1}, size=${pageSize}, search=${searchTerm}, fromDate=${fromDate}, toDate=${toDate}, tab=${tab})}">
+                        Sau →
+                    </a>
+                    <span th:if="${totalPages <= 1 || currentPage >= totalPages - 1}" class="pagination-disabled">Sau →</span>
 
+                    <!-- Page Size Selector -->
                     <form method="get" action="/receptionist/check-in" style="display: inline; margin: 0;">
                         <input type="hidden" name="search" th:value="${searchTerm}">
-                        <input type="hidden" name="dateRange" th:value="${dateRange}">
-                        <select name="size" onchange="this.form.submit();" style="padding: 0.7rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        <input type="hidden" name="fromDate" th:value="${fromDate}">
+                        <input type="hidden" name="toDate" th:value="${toDate}">
+                        <input type="hidden" name="tab" th:value="${tab}">
+                        <input type="hidden" name="page" value="0">
+                        <select name="size" onchange="this.form.submit();"
+                                style="padding: 0.7rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                            <option value="5" th:selected="${pageSize == 5}">5 bản ghi</option>
                             <option value="10" th:selected="${pageSize == 10}">10 bản ghi</option>
                             <option value="15" th:selected="${pageSize == 15}">15 bản ghi</option>
                             <option value="20" th:selected="${pageSize == 20}">20 bản ghi</option>
@@ -792,6 +812,16 @@
             const fromDateInput = formElement.querySelector('input[name="fromDate"]');
             const toDateInput = formElement.querySelector('input[name="toDate"]');
 
+            // Reset page về 0 khi filter
+            let pageInput = formElement.querySelector('input[name="page"]');
+            if (!pageInput) {
+                pageInput = document.createElement('input');
+                pageInput.type = 'hidden';
+                pageInput.name = 'page';
+                formElement.appendChild(pageInput);
+            }
+            pageInput.value = '0';
+
             let fromDate, toDate;
 
             switch(range) {
@@ -819,6 +849,17 @@
         function clearDateRange(formElement) {
             const fromDateInput = formElement.querySelector('input[name="fromDate"]');
             const toDateInput = formElement.querySelector('input[name="toDate"]');
+
+            // Reset page về 0 khi clear filter
+            let pageInput = formElement.querySelector('input[name="page"]');
+            if (!pageInput) {
+                pageInput = document.createElement('input');
+                pageInput.type = 'hidden';
+                pageInput.name = 'page';
+                formElement.appendChild(pageInput);
+            }
+            pageInput.value = '0';
+
             fromDateInput.value = '';
             toDateInput.value = '';
             formElement.submit();
