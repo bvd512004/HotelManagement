@@ -2,6 +2,7 @@
 package com.hsf302.hotelmanagement.controller;
 
 import com.hsf302.hotelmanagement.entity.Room;
+import com.hsf302.hotelmanagement.entity.Room_Status;
 import com.hsf302.hotelmanagement.entity.Task;
 import com.hsf302.hotelmanagement.entity.User;
 import com.hsf302.hotelmanagement.service.TaskService;
@@ -38,6 +39,7 @@ public class TaskController {
     @GetMapping
     public String listTasks(Model model) {
         User currentUser = (User) session.getAttribute("user");
+//        User currentUser = userService.searchUsers("dung123","HouseKeeping").get(0);
         if (currentUser == null) {
             return "redirect:/login";
         }
@@ -54,6 +56,7 @@ public class TaskController {
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> getMyTasks() {
         User currentUser = (User) session.getAttribute("user");
+//       User currentUser = userService.searchUsers("dung123","HouseKeeping").get(0);
         if (currentUser == null) {
             return ResponseEntity.status(401).body(new java.util.ArrayList<>());
         }
@@ -137,13 +140,25 @@ public class TaskController {
                         .body(Map.of("success", false, "message", "Task không tồn tại"));
             }
 
+            Room_Status availableStatus = null;
+            List<Room_Status> allStatuses = roomService.getAllRoomStatuses();
+            for (Room_Status status : allStatuses) {
+                if (status.getRoomStatus().equals("Available")) {
+                    availableStatus = status;
+                    break;
+                }
+            }
+
+            if (availableStatus == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "message", "Trạng thái 'Available' không tồn tại"));
+            }
+
             // Cập nhật trạng thái tất cả các phòng trong task thành Available
             if (task.getRooms() != null && !task.getRooms().isEmpty()) {
                 for (Room room : task.getRooms()) {
-                    if (room.getRoomStatus() != null) {
-                        room.getRoomStatus().setRoomStatus("Available");
-                        roomService.save(room);
-                    }
+                    room.setRoomStatus(availableStatus);
+                    roomService.save(room);
                 }
             }
 

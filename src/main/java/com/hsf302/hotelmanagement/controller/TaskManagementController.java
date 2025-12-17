@@ -1,6 +1,7 @@
 package com.hsf302.hotelmanagement.controller;
 
 import com.hsf302.hotelmanagement.entity.Room;
+import com.hsf302.hotelmanagement.entity.Room_Status;
 import com.hsf302.hotelmanagement.entity.Task;
 import com.hsf302.hotelmanagement.entity.User;
 import com.hsf302.hotelmanagement.service.RoomService;
@@ -41,16 +42,14 @@ public class TaskManagementController {
 
         // Lấy danh sách housekeeping staff (role = "Housekeeping Staff")
         List<User> housekeepingStaff = userService.findAll().stream()
-                .filter(user -> user.getRole() != null && "HouseKeeping Staff".equals(user.getRole()))
+                .filter(user -> user.getRole() != null && "HouseKeeping".equals(user.getRole()))
                 .collect(Collectors.toList());
 
         model.addAttribute("dirtyRooms", dirtyRooms);
         model.addAttribute("housekeepingStaff", housekeepingStaff);
         model.addAttribute("activePage", "task-assign");
-        model.addAttribute("view", "task-assign");
-
-        // Return the main layout
-        return "dashboard-layout";
+        
+        return "task-assign";
     }
 
     // API lấy danh sách phòng bẩn
@@ -80,7 +79,7 @@ public class TaskManagementController {
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> getHousekeepingStaff() {
         List<User> staff = userService.findAll().stream()
-                .filter(user -> user.getRole() != null && "HouseKeeping Staff".equals(user.getRole()))
+                .filter(user -> user.getRole() != null && "HouseKeeping".equals(user.getRole()))
                 .collect(Collectors.toList());
 
         List<Map<String, Object>> result = staff.stream()
@@ -129,6 +128,16 @@ public class TaskManagementController {
                 task.setDeadline(Timestamp.valueOf(deadline.replace("T", " ") + ":00"));
             }
 
+            Room_Status cleaningStatus = null;
+            List<Room_Status> allStatuses = roomService.getAllRoomStatuses();
+            for (Room_Status status : allStatuses) {
+                if (status.getRoomStatus().equals("Available")) {
+                    cleaningStatus = status;
+                    break;
+                }
+            }
+
+
             // Thêm tất cả phòng vào task
             for (Integer roomId : roomIds) {
                 Room room = roomService.findById(roomId);
@@ -142,6 +151,8 @@ public class TaskManagementController {
                             .body(Map.of("success", false, "message", "Phòng " + room.getRoomName() + " không phải Dirty"));
                 }
                 task.addRoom(room);
+                room.setRoomStatus(cleaningStatus);
+                roomService.save(room);
             }
 
             Task savedTask = taskService.save(task);
@@ -158,4 +169,3 @@ public class TaskManagementController {
         }
     }
 }
-

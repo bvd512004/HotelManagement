@@ -27,7 +27,6 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -359,8 +358,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .empty-state {
@@ -388,18 +391,272 @@
                 flex-wrap: wrap;
             }
         }
+
+        :root {
+            --primary-color: #20b2aa;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover-bg: #34495e;
+            --sidebar-active-bg: var(--primary-color);
+            --header-height: 60px;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 0px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: var(--header-height) 1fr auto;
+            grid-template-areas: "header header" "sidebar content" "sidebar footer";
+            height: 100vh;
+            transition: grid-template-columns var(--transition-speed) ease;
+        }
+
+        .dashboard-container.sidebar-collapsed {
+            grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+        }
+
+        .header {
+            grid-area: header;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        .menu-icon {
+            cursor: pointer;
+            font-size: 24px;
+            color: #333;
+            margin-right: 20px;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-right: auto;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding-top: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: width var(--transition-speed) ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px 20px 20px;
+        }
+
+        .sidebar-header .menu-icon {
+            color: var(--sidebar-text);
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: background-color var(--transition-speed);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: var(--sidebar-hover-bg);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: var(--sidebar-hover-bg);
+            border-left-color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .sidebar-menu li a .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .main-content {
+            grid-area: content;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .footer {
+            grid-area: footer;
+            background-color: #ffffff;
+            padding: 15px 30px;
+            text-align: center;
+            color: #888;
+            border-top: 1px solid #e9ecef;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .styled-table thead tr {
+            background-color: #f8f9fa;
+            color: #495057;
+            text-align: left;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .btn {
+            background: #20b2aa;
+            color: white;
+            border: 2px solid #20b2aa;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #1a9a9e;
+            border-color: #1a9a9e;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #6c757d;
+            color: white;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1>🧹 Giao Task Vệ Sinh Phòng</h1>
-                <div class="breadcrumb">Quản lý công việc vệ sinh cho housekeeping staff</div>
-            </div>
+<div class="dashboard-container" id="dashboard-container">
+    <header class="header">
+        <div class="menu-icon" id="header-menu-icon">☰</div>
+        <div class="header-title">Assign task clean</div>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/150?u=receptionist" alt="User Avatar">
+            <span>Lễ tân</span>
         </div>
+    </header>
 
-        <div class="content">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="menu-icon" id="sidebar-menu-icon">☰</div>
+            <span class="sidebar-title">Menu</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/rooms/list}" th:classappend="${activePage == 'room-list'} ? 'active'">Rooms Layout</a></li>
+            <li><a th:href="@{/receptionist/check-in}" th:classappend="${activePage == 'check-in'} ? 'active'">Check-in</a></li>
+            <li><a th:href="@{/receptionist/check-out}" th:classappend="${activePage == 'check-out'} ? 'active'">Check-out</a></li>
+            <li><a th:href="@{/tasks-management/assign}" th:classappend="${activePage == 'task-assign'} ? 'active'">Assign Task</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1>🧹 Giao Task Vệ Sinh Phòng</h1>
+                </div>
+            </div>
+
+            <div class="content">
                 <!-- Danh sách phòng bẩn -->
                 <div class="card">
                     <div class="card-title">📍 Phòng Cần Vệ Sinh (Dirty) - Chọn Nhiều</div>
@@ -415,103 +672,105 @@
                     </div>
                 </div>
 
-            <!-- Housekeeping staff -->
-            <div class="card">
-                <div class="card-title">👤 Chọn Housekeeping Staff</div>
-                <div id="staffContainer" class="staff-list">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Đang tải danh sách nhân viên...</p>
+                <!-- Housekeeping staff -->
+                <div class="card">
+                    <div class="card-title">👤 Chọn Housekeeping Staff</div>
+                    <div id="staffContainer" class="staff-list">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Đang tải danh sách nhân viên...</p>
+                        </div>
+                    </div>
+                    <div id="emptyStaff" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">😞</div>
+                        <p>Không có housekeeping staff nào</p>
                     </div>
                 </div>
-                <div id="emptyStaff" class="empty-state" style="display: none;">
-                    <div class="empty-state-icon">😞</div>
-                    <p>Không có housekeeping staff nào</p>
+            </div>
+
+            <!-- Tóm tắt và cấu hình -->
+            <div class="summary">
+                <div class="card-title">⚙️Task</div>
+
+                <div id="selectionAlert" class="alert alert-warning" style="display: none;">
+                    ⚠️ Vui lòng chọn phòng và nhân viên để tiếp tục
+                </div>
+
+                <div id="successAlert" class="alert alert-success" style="display: none;">
+                    ✓ Task đã được tạo thành công!
+                </div>
+
+                <div id="errorAlert" class="alert alert-error" style="display: none;"></div>
+
+                <!-- Priority -->
+                <div class="priority-group">
+                    <label>Độ Ưu Tiên</label>
+                    <div class="priority-options">
+                        <button class="priority-btn" data-priority="Low">🟢 Thấp</button>
+                        <button class="priority-btn selected" data-priority="Normal">🟡 Bình Thường</button>
+                        <button class="priority-btn" data-priority="High">🔴 Cao</button>
+                    </div>
+                </div>
+
+                <!-- Deadline -->
+                <div class="deadline-group">
+                    <label>Hạn Chót (Tùy Chọn)</label>
+                    <input type="datetime-local" id="deadline" placeholder="Chọn hạn chót">
+                </div>
+
+                <!-- Tóm tắt lựa chọn -->
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div class="summary-item">
+                        <div class="summary-label">Phòng Được Chọn</div>
+                        <div class="summary-value" id="selectedRoom">Chưa chọn</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Nhân Viên Được Chọn</div>
+                        <div class="summary-value" id="selectedStaff">Chưa chọn</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Độ Ưu Tiên</div>
+                        <div class="summary-value" id="selectedPriority">🟡 Bình Thường</div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-reset" onclick="resetForm()">↻ Đặt Lại</button>
+                    <button class="btn btn-submit" id="submitBtn" onclick="submitTask()" disabled>✓ Giao Task</button>
                 </div>
             </div>
         </div>
 
-        <!-- Tóm tắt và cấu hình -->
-        <div class="summary">
-            <div class="card-title">⚙️ Cấu Hình Task</div>
+    </main>
+</div>
+<script>
+    let selectedRooms = new Map(); // Map để lưu nhiều phòng: roomId => roomData
+    let selectedStaff = null;
+    let selectedPriority = "Normal";
 
-            <div id="selectionAlert" class="alert alert-warning" style="display: none;">
-                ⚠️ Vui lòng chọn phòng và nhân viên để tiếp tục
-            </div>
+    // Load danh sách phòng bẩn
+    function loadDirtyRooms() {
+        fetch('/tasks-management/api/dirty-rooms')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('roomsContainer');
+                const emptyState = document.getElementById('emptyRooms');
 
-            <div id="successAlert" class="alert alert-success" style="display: none;">
-                ✓ Task đã được tạo thành công!
-            </div>
-
-            <div id="errorAlert" class="alert alert-error" style="display: none;"></div>
-
-            <!-- Priority -->
-            <div class="priority-group">
-                <label>Độ Ưu Tiên</label>
-                <div class="priority-options">
-                    <button class="priority-btn" data-priority="Low">🟢 Thấp</button>
-                    <button class="priority-btn selected" data-priority="Normal">🟡 Bình Thường</button>
-                    <button class="priority-btn" data-priority="High">🔴 Cao</button>
-                </div>
-            </div>
-
-            <!-- Deadline -->
-            <div class="deadline-group">
-                <label>Hạn Chót (Tùy Chọn)</label>
-                <input type="datetime-local" id="deadline" placeholder="Chọn hạn chót">
-            </div>
-
-            <!-- Tóm tắt lựa chọn -->
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <div class="summary-item">
-                    <div class="summary-label">Phòng Được Chọn</div>
-                    <div class="summary-value" id="selectedRoom">Chưa chọn</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Nhân Viên Được Chọn</div>
-                    <div class="summary-value" id="selectedStaff">Chưa chọn</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Độ Ưu Tiên</div>
-                    <div class="summary-value" id="selectedPriority">🟡 Bình Thường</div>
-                </div>
-            </div>
-
-            <!-- Buttons -->
-            <div class="action-buttons">
-                <button class="btn btn-reset" onclick="resetForm()">↻ Đặt Lại</button>
-                <button class="btn btn-submit" id="submitBtn" onclick="submitTask()" disabled>✓ Giao Task</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let selectedRooms = new Map(); // Map để lưu nhiều phòng: roomId => roomData
-        let selectedStaff = null;
-        let selectedPriority = "Normal";
-
-        // Load danh sách phòng bẩn
-        function loadDirtyRooms() {
-            fetch('/tasks-management/api/dirty-rooms')
-                .then(res => res.json())
-                .then(data => {
-                    const container = document.getElementById('roomsContainer');
-                    const emptyState = document.getElementById('emptyRooms');
-
-                    if (data.length === 0) {
-                        container.innerHTML = '';
-                        emptyState.style.display = 'block';
-                        return;
-                    }
-
+                if (data.length === 0) {
                     container.innerHTML = '';
-                    emptyState.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
 
-                    data.forEach(room => {
-                        const div = document.createElement('div');
-                        div.className = 'room-item';
-                        div.id = `room-${room.roomId}`;
-                        div.innerHTML = `
+                container.innerHTML = '';
+                emptyState.style.display = 'none';
+
+                data.forEach(room => {
+                    const div = document.createElement('div');
+                    div.className = 'room-item';
+                    div.id = `room-${room.roomId}`;
+                    div.innerHTML = `
                             <input type="checkbox" class="room-checkbox" id="chk_room_${room.roomId}"
                                    onchange="toggleRoom(${room.roomId}, this)">
                             <div class="room-content">
@@ -522,144 +781,144 @@
                                 </div>
                             </div>
                         `;
-                        container.appendChild(div);
-                    });
-                })
-                .catch(err => {
-                    console.error('Error loading rooms:', err);
-                    document.getElementById('roomsContainer').innerHTML = '<div class="empty-state"><p>❌ Lỗi khi tải danh sách phòng</p></div>';
+                    container.appendChild(div);
                 });
+            })
+            .catch(err => {
+                console.error('Error loading rooms:', err);
+                document.getElementById('roomsContainer').innerHTML = '<div class="empty-state"><p>❌ Lỗi khi tải danh sách phòng</p></div>';
+            });
+    }
+
+    // Toggle select/unselect phòng
+    function toggleRoom(roomId, checkbox) {
+        const roomElement = document.getElementById(`room-${roomId}`);
+
+        if (checkbox.checked) {
+            // Thêm vào danh sách
+            const roomName = roomElement.querySelector('.room-name').textContent;
+            selectedRooms.set(roomId, {
+                roomId: roomId,
+                roomName: roomName
+            });
+            roomElement.classList.add('selected');
+        } else {
+            // Xóa khỏi danh sách
+            selectedRooms.delete(roomId);
+            roomElement.classList.remove('selected');
         }
 
-        // Toggle select/unselect phòng
-        function toggleRoom(roomId, checkbox) {
-            const roomElement = document.getElementById(`room-${roomId}`);
+        updateSelectedRoomsSummary();
+        updateSubmitButton();
+    }
 
-            if (checkbox.checked) {
-                // Thêm vào danh sách
-                const roomName = roomElement.querySelector('.room-name').textContent;
-                selectedRooms.set(roomId, {
-                    roomId: roomId,
-                    roomName: roomName
-                });
-                roomElement.classList.add('selected');
-            } else {
-                // Xóa khỏi danh sách
-                selectedRooms.delete(roomId);
-                roomElement.classList.remove('selected');
-            }
-
-            updateSelectedRoomsSummary();
-            updateSubmitButton();
+    // Cập nhật tóm tắt phòng được chọn
+    function updateSelectedRoomsSummary() {
+        const summaryDiv = document.getElementById('selectedRoom');
+        if (selectedRooms.size === 0) {
+            summaryDiv.textContent = 'Chưa chọn';
+        } else {
+            const roomNames = Array.from(selectedRooms.values())
+                .map(r => r.roomName)
+                .join(', ');
+            summaryDiv.textContent = `${selectedRooms.size} phòng: ${roomNames}`;
         }
+    }
 
-        // Cập nhật tóm tắt phòng được chọn
-        function updateSelectedRoomsSummary() {
-            const summaryDiv = document.getElementById('selectedRoom');
-            if (selectedRooms.size === 0) {
-                summaryDiv.textContent = 'Chưa chọn';
-            } else {
-                const roomNames = Array.from(selectedRooms.values())
-                    .map(r => r.roomName)
-                    .join(', ');
-                summaryDiv.textContent = `${selectedRooms.size} phòng: ${roomNames}`;
-            }
-        }
+    // Load danh sách housekeeping staff
+    function loadHousekeepingStaff() {
+        fetch('/tasks-management/api/housekeeping-staff')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('staffContainer');
+                const emptyState = document.getElementById('emptyStaff');
 
-        // Load danh sách housekeeping staff
-        function loadHousekeepingStaff() {
-            fetch('/tasks-management/api/housekeeping-staff')
-                .then(res => res.json())
-                .then(data => {
-                    const container = document.getElementById('staffContainer');
-                    const emptyState = document.getElementById('emptyStaff');
-
-                    if (data.length === 0) {
-                        container.innerHTML = '';
-                        emptyState.style.display = 'block';
-                        return;
-                    }
-
+                if (data.length === 0) {
                     container.innerHTML = '';
-                    emptyState.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
 
-                    data.forEach(staff => {
-                        const div = document.createElement('div');
-                        div.className = 'staff-item';
-                        const initials = staff.fullName.split(' ').map(n => n.charAt(0)).join('');
-                        div.innerHTML = `
+                container.innerHTML = '';
+                emptyState.style.display = 'none';
+
+                data.forEach(staff => {
+                    const div = document.createElement('div');
+                    div.className = 'staff-item';
+                    const initials = staff.fullName.split(' ').map(n => n.charAt(0)).join('');
+                    div.innerHTML = `
                             <div class="staff-avatar">${initials}</div>
                             <div class="staff-name">${staff.fullName}</div>
                         `;
-                        div.onclick = () => selectStaff(staff, div);
-                        container.appendChild(div);
-                    });
-                })
-                .catch(err => {
-                    console.error('Error loading staff:', err);
-                    document.getElementById('staffContainer').innerHTML = '<div class="empty-state"><p>❌ Lỗi khi tải danh sách nhân viên</p></div>';
+                    div.onclick = () => selectStaff(staff, div);
+                    container.appendChild(div);
                 });
-        }
-
-        // Select staff
-        function selectStaff(staff, element) {
-            document.querySelectorAll('.staff-item').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedStaff = staff;
-            document.getElementById('selectedStaff').textContent = staff.fullName;
-            updateSubmitButton();
-        }
-
-        // Priority buttons
-        document.querySelectorAll('.priority-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
-                selectedPriority = this.dataset.priority;
-                document.getElementById('selectedPriority').textContent = this.textContent;
-            });
-        });
-
-        // Update submit button state
-        function updateSubmitButton() {
-            const btn = document.getElementById('submitBtn');
-            if (selectedRooms.size > 0 && selectedStaff) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
-        }
-
-        // Submit task
-        function submitTask() {
-            if (selectedRooms.size === 0 || !selectedStaff) {
-                document.getElementById('selectionAlert').style.display = 'block';
-                return;
-            }
-
-            document.getElementById('selectionAlert').style.display = 'none';
-            document.getElementById('errorAlert').style.display = 'none';
-
-            const deadline = document.getElementById('deadline').value;
-
-            // Tạo dữ liệu gửi: nhiều roomId
-            const roomIds = Array.from(selectedRooms.keys());
-            const params = new URLSearchParams();
-            roomIds.forEach(id => params.append('roomIds', id));
-            params.append('userId', selectedStaff.userId);
-            params.append('priority', selectedPriority);
-            if (deadline) {
-                params.append('deadline', deadline);
-            }
-
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Đang xử lý...';
-
-            fetch('/tasks-management/api/create-task', {
-                method: 'POST',
-                body: params
             })
+            .catch(err => {
+                console.error('Error loading staff:', err);
+                document.getElementById('staffContainer').innerHTML = '<div class="empty-state"><p>❌ Lỗi khi tải danh sách nhân viên</p></div>';
+            });
+    }
+
+    // Select staff
+    function selectStaff(staff, element) {
+        document.querySelectorAll('.staff-item').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedStaff = staff;
+        document.getElementById('selectedStaff').textContent = staff.fullName;
+        updateSubmitButton();
+    }
+
+    // Priority buttons
+    document.querySelectorAll('.priority-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedPriority = this.dataset.priority;
+            document.getElementById('selectedPriority').textContent = this.textContent;
+        });
+    });
+
+    // Update submit button state
+    function updateSubmitButton() {
+        const btn = document.getElementById('submitBtn');
+        if (selectedRooms.size > 0 && selectedStaff) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+    }
+
+    // Submit task
+    function submitTask() {
+        if (selectedRooms.size === 0 || !selectedStaff) {
+            document.getElementById('selectionAlert').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('selectionAlert').style.display = 'none';
+        document.getElementById('errorAlert').style.display = 'none';
+
+        const deadline = document.getElementById('deadline').value;
+
+        // Tạo dữ liệu gửi: nhiều roomId
+        const roomIds = Array.from(selectedRooms.keys());
+        const params = new URLSearchParams();
+        roomIds.forEach(id => params.append('roomIds', id));
+        params.append('userId', selectedStaff.userId);
+        params.append('priority', selectedPriority);
+        if (deadline) {
+            params.append('deadline', deadline);
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Đang xử lý...';
+
+        fetch('/tasks-management/api/create-task', {
+            method: 'POST',
+            body: params
+        })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -683,32 +942,47 @@
                 btn.disabled = false;
                 btn.textContent = '✓ Giao Task';
             });
-        }
+    }
 
-        // Reset form
-        function resetForm() {
-            selectedRooms.clear();
-            selectedStaff = null;
-            selectedPriority = "Normal";
-            document.querySelectorAll('.room-item').forEach(el => el.classList.remove('selected'));
-            document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = false);
-            document.querySelectorAll('.staff-item').forEach(el => el.classList.remove('selected'));
-            document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
-            document.querySelector('[data-priority="Normal"]').classList.add('selected');
-            document.getElementById('selectedRoom').textContent = 'Chưa chọn';
-            document.getElementById('selectedStaff').textContent = 'Chưa chọn';
-            document.getElementById('selectedPriority').textContent = '🟡 Bình Thường';
-            document.getElementById('deadline').value = '';
-            document.getElementById('submitBtn').disabled = true;
-            updateSubmitButton();
-        }
+    // Reset form
+    function resetForm() {
+        selectedRooms.clear();
+        selectedStaff = null;
+        selectedPriority = "Normal";
+        document.querySelectorAll('.room-item').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.staff-item').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelector('[data-priority="Normal"]').classList.add('selected');
+        document.getElementById('selectedRoom').textContent = 'Chưa chọn';
+        document.getElementById('selectedStaff').textContent = 'Chưa chọn';
+        document.getElementById('selectedPriority').textContent = '🟡 Bình Thường';
+        document.getElementById('deadline').value = '';
+        document.getElementById('submitBtn').disabled = true;
+        updateSubmitButton();
+    }
 
-        // Initialize
-        window.addEventListener('load', function() {
-            loadDirtyRooms();
-            loadHousekeepingStaff();
-        });
-    </script>
+    // Initialize
+    window.addEventListener('load', function () {
+        loadDirtyRooms();
+        loadHousekeepingStaff();
+    });
+</script>
+<footer th:fragment="footer" class="footer">
+    &copy; 2024 Hotel Management System. All Rights Reserved.
+</footer>
+</div>
+
+<script>
+    const headerMenuIcon = document.getElementById('header-menu-icon');
+    const sidebarMenuIcon = document.getElementById('sidebar-menu-icon');
+    const dashboardContainer = document.getElementById('dashboard-container');
+    const toggleSidebar = () => {
+        dashboardContainer.classList.toggle('sidebar-collapsed');
+    };
+    headerMenuIcon.addEventListener('click', toggleSidebar);
+    sidebarMenuIcon.addEventListener('click', toggleSidebar);
+</script>
 </body>
 </html>
 

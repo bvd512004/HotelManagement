@@ -25,7 +25,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
             background: white;
             padding: 25px;
             border-radius: 10px;
@@ -36,6 +35,32 @@
             font-size: 32px;
             color: #333;
             font-weight: 600;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-form label {
+            font-weight: 600;
+        }
+
+        .filter-form input,
+        .filter-form select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .filter-form button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            background-color: #667eea;
+            color: white;
+            cursor: pointer;
         }
 
         .btn-create {
@@ -118,24 +143,16 @@
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
 
-        .room-card-header.occupied {
-            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-        }
-
-        .room-card-header.maintenance {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        .room-card-header.booked {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
         .room-card-header.reserved {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
-        .room-card-header.cleaning {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .room-card-header.dirty {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        .room-card-header.checked-in {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
         }
 
         .room-status-badge {
@@ -279,6 +296,11 @@
 
         .btn-reserve:disabled:hover {
             background-color: #ccc;
+        }
+
+        .btn-view-customer {
+            background-color: #2196F3;
+            color: white;
         }
 
         .empty-state {
@@ -627,86 +649,154 @@
                 font-size: 24px;
             }
         }
+        :root {
+            --primary-color: #20b2aa;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover-bg: #34495e;
+            --sidebar-active-bg: var(--primary-color);
+            --header-height: 60px;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 0px;
+            --transition-speed: 0.3s;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
+        .dashboard-container { display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: var(--header-height) 1fr auto; grid-template-areas: "header header" "sidebar content" "sidebar footer"; height: 100vh; transition: grid-template-columns var(--transition-speed) ease; }
+        .dashboard-container.sidebar-collapsed { grid-template-columns: var(--sidebar-collapsed-width) 1fr; }
+        .header { grid-area: header; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 0 20px; z-index: 10; }
+        .menu-icon { cursor: pointer; font-size: 24px; color: #333; margin-right: 20px; }
+        .header-title { font-size: 1.5rem; color: var(--primary-color); font-weight: 600; margin-right: auto; }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .sidebar { grid-area: sidebar; background-color: var(--sidebar-bg); color: var(--sidebar-text); padding-top: 10px; overflow: hidden; white-space: nowrap; transition: width var(--transition-speed) ease; }
+        .sidebar-header { display: flex; align-items: center; gap: 15px; padding: 10px 20px 20px 20px; }
+        .sidebar-header .menu-icon { color: var(--sidebar-text); }
+        .sidebar-title { font-size: 1.2rem; font-weight: 600; }
+        .sidebar-menu { list-style: none; margin: 0; padding: 0; }
+        .sidebar-menu li a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; color: var(--sidebar-text); text-decoration: none; transition: background-color var(--transition-speed); border-left: 4px solid transparent; }
+        .sidebar-menu li a:hover { background-color: var(--sidebar-hover-bg); }
+        .sidebar-menu li a.active { background-color: var(--sidebar-hover-bg); border-left-color: var(--primary-color); font-weight: bold; }
+        .main-content { grid-area: content; padding: 30px; overflow-y: auto; }
+        .footer { grid-area: footer; background-color: #ffffff; padding: 15px 30px; text-align: center; color: #888; border-top: 1px solid #e9ecef; }
+        h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1.5rem; color: #2c3e50; }
+        .content-card { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🏨 Room Management</h1>
-            <a href="/rooms/create" class="btn-create">+ Add New Room</a>
+<div class="dashboard-container" id="dashboard-container">
+    <header class="header">
+        <div class="menu-icon" id="header-menu-icon">☰</div>
+        <div class="header-title">Quản Lý Room</div>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/150?u=receptionist" alt="User Avatar">
+            <span>Lễ tân</span>
         </div>
+    </header>
 
-        <div th:if="${rooms != null and rooms.size() > 0}">
-            <!-- Group and display floors with their rooms -->
-            <div class="rooms-container">
-                <div th:each="floor : ${floorRooms.keySet()}" class="floor-section">
-                    <h2 class="floor-title" th:if="${floor != null}">
-                        <span class="floor-icon">🏢</span>
-                        <span th:text="${'Floor ' + floor.floorNumber}"></span>
-                    </h2>
-                    <h2 class="floor-title" th:if="${floor == null}">
-                        <span class="floor-icon">🏢</span>
-                        <span>No Floor Assigned</span>
-                    </h2>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="menu-icon" id="sidebar-menu-icon">☰</div>
+            <span class="sidebar-title">Menu</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/rooms/list}" th:classappend="${activePage == 'room-list'} ? 'active'">Rooms Layout</a></li>
+            <li><a th:href="@{/receptionist/check-in}" th:classappend="${activePage == 'check-in'} ? 'active'">Check-in</a></li>
+            <li><a th:href="@{/receptionist/check-out}" th:classappend="${activePage == 'check-out'} ? 'active'">Check-out</a></li>
+            <li><a th:href="@{/tasks-management/assign}" th:classappend="${activePage == 'task-assign'} ? 'active'">Assign Task</a></li>        </ul>
+    </aside>
 
-                    <div class="rooms-grid">
-                        <!-- Display all rooms for this floor -->
-                        <div th:each="room : ${floorRooms.get(floor)}" class="room-card">
-                            <div class="room-card-header"
-                                 th:classappend="${room.roomStatus.roomStatus == 'Available' ? 'available' :
-                                                room.roomStatus.roomStatus == 'Occupied' ? 'occupied' :
-                                                room.roomStatus.roomStatus == 'Reserved' ? 'reserved' :
-                                                room.roomStatus.roomStatus == 'Cleaning' ? 'cleaning' :
-                                                room.roomStatus.roomStatus == 'Dirty' ? 'dirty' : 'maintenance'}">
-                                <span class="room-status-badge"
-                                      th:text="${room.roomStatus.roomStatus}"></span>
-                                <div class="room-number" th:text="${room.roomName}"></div>
-                                <div class="room-type" th:text="${room.roomType.typeName}"></div>
+    <main class="main-content">
+        <div class="container">
+            <div class="header">
+                <h1>🏨 Room Management</h1>
+                <form th:action="@{/rooms/list}" method="get" class="filter-form">
+                    <label for="startDate">From:</label>
+                    <input type="date" id="startDate" name="startDate" th:value="${#temporals.format(startDate, 'yyyy-MM-dd')}">
+
+                    <label for="endDate">To:</label>
+                    <input type="date" id="endDate" name="endDate" th:value="${#temporals.format(endDate, 'yyyy-MM-dd')}">
+
+                    <label for="status">Status:</label>
+                    <select id="status" name="status">
+                        <option value="">All</option>
+                        <option th:each="s : ${statusOptions}" th:value="${s}" th:text="${s}" th:selected="${s == selectedStatus}"></option>
+                    </select>
+
+                    <button type="submit">Filter</button>
+                </form>
+            </div>
+
+            <div th:if="${floorRooms != null and !floorRooms.isEmpty()}">
+                <div class="rooms-container">
+                    <div th:each="floorEntry : ${floorRooms.entrySet()}" class="floor-section">
+                        <h2 class="floor-title" th:if="${floorEntry.key != null}">
+                            <span class="floor-icon">🏢</span>
+                            <span th:text="${'Floor ' + floorEntry.key.floorNumber}"></span>
+                        </h2>
+                        <h2 class="floor-title" th:if="${floorEntry.key == null}">
+                            <span class="floor-icon">🏢</span>
+                            <span>No Floor Assigned</span>
+                        </h2>
+
+                        <div class="rooms-grid">
+                            <div th:each="roomDTO : ${floorEntry.value}" class="room-card">
+                                <div class="room-card-header"
+                                     th:classappend="${#strings.toLowerCase(roomDTO.status) == 'available' ? 'available' :
+                                                  #strings.toLowerCase(roomDTO.status) == 'booked' ? 'booked' :
+                                                  #strings.toLowerCase(roomDTO.status) == 'reserved' ? 'reserved' :
+                                                      #strings.toLowerCase(roomDTO.status) == 'checked-in' ? 'checked-in' : ''}">
+                                    <span class="room-status-badge" th:text="${roomDTO.status}"></span>
+                                    <div class="room-number" th:text="${roomDTO.room.roomName}"></div>
+                                    <div class="room-type" th:text="${roomDTO.room.roomType.typeName}"></div>
+                                </div>
+
+                                <div class="room-card-body">
+                                    <div class="room-info">
+                                        <span class="room-info-label">Price</span>
+                                        <span class="room-price" th:text="${'₫' + #numbers.formatDecimal(roomDTO.room.roomType.basePrice, 1, 0, 'COMMA')}"></span>
+                                    </div>
+
+                                    <div class="room-capacity">
+                                        👥 <span th:text="${roomDTO.room.roomType.capacity + ' guests'}"></span>
+                                    </div>
+
+                                    <div class="room-info">
+                                        <span class="room-info-label">Floor</span>
+                                        <span class="room-info-value" th:text="${floorEntry.key != null ? 'Floor ' + floorEntry.key.floorNumber : 'N/A'}"></span>
+                                    </div>
+
+                                    <div class="room-description" th:if="${roomDTO.room.roomType.description != null}">
+                                        <strong>Description:</strong><br/>
+                                        <span th:text="${#strings.abbreviate(roomDTO.room.roomType.description, 50)}"></span>
+                                    </div>
+
+                                    <div class="room-actions">
+                                        <button class="btn-action btn-reserve"
+                                                onclick="openReservationModal(this)"
+                                                th:data-room-id="${roomDTO.room.roomId}"
+                                                th:data-room-name="${roomDTO.room.roomName}"
+                                                th:data-room-type="${roomDTO.room.roomType.typeName}"
+                                                th:data-price="${roomDTO.room.roomType.basePrice}"
+                                                th:title="'Đặt trước'">
+                                            Đặt trước
+                                        </button>
+                                        <a th:href="@{/reservations/room/{roomId}(roomId=${roomDTO.room.roomId})}" class="btn-action btn-view-customer">View Reservations</a>
+                                    </div>
+                                </div>
                             </div>
-
-                            <div class="room-card-body">
-                                <div class="room-info">
-                                    <span class="room-info-label">Price</span>
-                                    <span class="room-price" th:text="${'₫' + #numbers.formatDecimal(room.roomType.basePrice, 1, 0, 'COMMA')}"></span>
-                                </div>
-
-                                <div class="room-capacity">
-                                    👥 <span th:text="${room.roomType.capacity + ' guests'}"></span>
-                                </div>
-
-                                <div class="room-info">
-                                    <span class="room-info-label">Floor</span>
-                                    <span class="room-info-value" th:text="${floor != null ? 'Floor ' + floor.floorNumber : 'N/A'}"></span>
-                                </div>
-
-                                <div class="room-description" th:if="${room.roomType.description != null}">
-                                    <strong>Description:</strong><br/>
-                                    <span th:text="${#strings.abbreviate(room.roomType.description, 50)}"></span>
-                                </div>
-
-                                <div class="room-actions">
-                                    <button class="btn-action btn-reserve"
-                                            onclick="openReservationModal(this)"
-                                            th:data-room-id="${room.roomId}"
-                                            th:data-room-name="${room.roomName}"
-                                            th:data-room-type="${room.roomType.typeName}"
-                                            th:data-price="${room.roomType.basePrice}"
-                                            th:disabled="${room.roomStatus.roomStatus != 'Available'}"
-                                            th:title="${room.roomStatus.roomStatus != 'Available' ? 'Phòng không khả dụng' : 'Đặt trước'}">
-                                        Đặt trước
-                                    </button>
-                                </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div th:if="${floorRooms == null or floorRooms.isEmpty()}" class="empty-state">
+                <h3>No Rooms Found</h3>
+            </div>
         </div>
 
-        <div th:if="${rooms == null or rooms.size() == 0}" class="empty-state">
-            <h3>No Rooms Found</h3>
-            <p>Start by creating your first room</p>
-            <a href="/rooms/create" class="btn-create">+ Create Room</a>
-        </div>
-    </div>
+    </main>
+
 
     <!-- Modal Đặt trước phòng -->
     <div id="reservationModal" class="modal">
@@ -1222,5 +1312,21 @@
             }
         };
     </script>
+</div>
+<footer th:fragment="footer" class="footer">
+    &copy; 2024 Hotel Management System. All Rights Reserved.
+</footer>
+</div>
+
+<script>
+    const headerMenuIcon = document.getElementById('header-menu-icon');
+    const sidebarMenuIcon = document.getElementById('sidebar-menu-icon');
+    const dashboardContainer = document.getElementById('dashboard-container');
+    const toggleSidebar = () => {
+        dashboardContainer.classList.toggle('sidebar-collapsed');
+    };
+    headerMenuIcon.addEventListener('click', toggleSidebar);
+    sidebarMenuIcon.addEventListener('click', toggleSidebar);
+</script>
 </body>
 </html>
