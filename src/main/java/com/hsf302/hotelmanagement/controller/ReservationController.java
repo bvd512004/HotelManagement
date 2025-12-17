@@ -1,6 +1,7 @@
 package com.hsf302.hotelmanagement.controller;
 
 import com.hsf302.hotelmanagement.dto.response.ReservationDTO;
+import com.hsf302.hotelmanagement.dto.response.overviewReservationDTO; // Import the new DTO
 import com.hsf302.hotelmanagement.entity.*;
 import com.hsf302.hotelmanagement.repository.GuestRepository;
 import com.hsf302.hotelmanagement.service.ReservationService;
@@ -12,8 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.text.SimpleDateFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Controller
@@ -33,12 +36,11 @@ public class ReservationController {
     public String listReservations(Model model) {
         model.addAttribute("reservations", reservationService.findAll());
         model.addAttribute("view", "reservation-list");
-
-        // Return the main layout
         return "dashboard-layout";
     }
 
-    // API để kiểm tra phòng có khả dụng không
+    // ... (other API methods remain unchanged)
+
     @GetMapping("/api/check-availability")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> checkAvailability(
@@ -58,7 +60,6 @@ public class ReservationController {
                 return ResponseEntity.ok(response);
             }
 
-            // Kiểm tra trạng thái phòng
             if (room.getRoomStatus() != null) {
                 String status = room.getRoomStatus().getRoomStatus();
                 if (status.equals("Occupied") || status.equals("Dirty") || status.equals("Cleaning")) {
@@ -69,7 +70,6 @@ public class ReservationController {
                 }
             }
 
-            // Kiểm tra có reservation trùng khoảng thời gian không
             List<Reservation> conflictingReservations = reservationService.findConflictingReservations(roomId, checkIn, checkOut);
 
             Map<String, Object> response = new HashMap<>();
@@ -91,7 +91,6 @@ public class ReservationController {
         }
     }
 
-    // API để lấy thông tin phòng
     @GetMapping("/api/room/{roomId}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getRoomDetails(@PathVariable int roomId) {
@@ -112,7 +111,6 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    // API để lấy danh sách dịch vụ
     @GetMapping("/api/services")
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> getServices() {
@@ -132,7 +130,6 @@ public class ReservationController {
         return ResponseEntity.ok(serviceList);
     }
 
-    // API để tính tiền
     @PostMapping("/api/calculate-price")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> calculatePrice(@RequestBody Map<String, Object> data) {
@@ -146,7 +143,6 @@ public class ReservationController {
                 return ResponseEntity.badRequest().body(null);
             }
 
-            // Tính số đêm
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date checkIn = sdf.parse(checkInDate);
             Date checkOut = sdf.parse(checkOutDate);
@@ -155,8 +151,6 @@ public class ReservationController {
             if (nights <= 0) nights = 1;
 
             double totalRoomPrice = roomType.getBasePrice() * nights;
-
-            // Tính tiền dịch vụ nếu có
             double totalServicePrice = 0;
             if (data.containsKey("services")) {
                 List<Map<String, Object>> services = (List<Map<String, Object>>) data.get("services");
@@ -190,13 +184,11 @@ public class ReservationController {
         }
     }
 
-    // API để lưu reservation
     @PostMapping("/api/save")
     @ResponseBody
     @Transactional
     public ResponseEntity<Map<String, Object>> saveReservation(@RequestBody ReservationDTO dto) {
         try {
-            // Tìm hoặc tạo guest mới
             Guest guest = null;
             if (dto.getGuestId() > 0) {
                 guest = guestRepository.findById(dto.getGuestId()).orElse(null);
@@ -212,10 +204,7 @@ public class ReservationController {
                 guest = guestRepository.save(guest);
             }
 
-            // Tạo reservation
             Reservation reservation = new Reservation();
-
-            // Parse dates
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             reservation.setCheckInDate(sdf.parse(dto.getCheckInDate()));
             reservation.setCheckOutDate(sdf.parse(dto.getCheckOutDate()));
@@ -225,7 +214,6 @@ public class ReservationController {
             reservation.setCreatedAt(LocalDateTime.now());
             reservation.setGuest(guest);
 
-            // Tạo reservation_rooms
             List<Reservation_Room> reservationRooms = new ArrayList<>();
             Room room = roomService.findById(dto.getRoomId());
             Reservation_Room resRoom = new Reservation_Room();
@@ -235,12 +223,10 @@ public class ReservationController {
             reservationRooms.add(resRoom);
             reservation.setReservation_rooms(reservationRooms);
 
-            // Set reservation cho các room
             for (Reservation_Room rr : reservationRooms) {
                 rr.setReservation(reservation);
             }
 
-            // Tạo reservation_services
             List<Reservation_Service> reservationServices = new ArrayList<>();
             if (dto.getServiceIds() != null && !dto.getServiceIds().isEmpty()) {
                 for (int i = 0; i < dto.getServiceIds().size(); i++) {
@@ -265,10 +251,8 @@ public class ReservationController {
             }
             reservation.setReservation_services(reservationServices);
 
-            // Lưu reservation
             Reservation savedReservation = reservationService.save(reservation);
 
-            // Cập nhật trạng thái phòng thành Reserved
             if (room != null) {
                 Room_Status reservedStatus = null;
                 List<Room_Status> allStatuses = roomService.getAllRoomStatuses();
@@ -299,5 +283,51 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-}
+    @GetMapping("/manager/reservations-fragment")
+    public String showReservationList(@RequestParam(value = "filter", required = false, defaultValue = "all") String filter, Model model) {
+        List<Reservation> reservations;
+        if ("today".equals(filter)) {
+            reservations = reservationService.getReservationForToday();
+        } else if ("month".equals(filter)) {
+            reservations = reservationService.getReservationForThisMonth();
+        } else {
+            reservations = reservationService.getAllReservations();
+        }
 
+        List<overviewReservationDTO> reservationList = new ArrayList<>();
+
+        for (Reservation res : reservations) {
+            if (res.getReservation_rooms() != null) {
+                for (Reservation_Room reservationRoom : res.getReservation_rooms()) {
+                    // Add more comprehensive null checks
+                    if (res.getGuest() != null && reservationRoom.getRoom() != null &&
+                        reservationRoom.getRoom().getRoomType() != null &&
+                        res.getCheckInDate() != null && res.getCheckOutDate() != null) {
+                        try {
+                            String guestName = res.getGuest().getFirstName() + " " + res.getGuest().getLastName();
+                            String roomName = reservationRoom.getRoom().getRoomName();
+
+                            overviewReservationDTO dto = new overviewReservationDTO(
+                                    res.getReservationId(),
+                                    guestName,
+                                    roomName,
+                                    res.getCheckInDate(),
+                                    res.getCheckOutDate(),
+                                    res.getNumberOfGuests(),
+                                    res.getTotalAmount() // Use the total amount from the reservation object
+                            );
+                            reservationList.add(dto);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
+        model.addAttribute("resList", reservationList);
+        model.addAttribute("filter", filter);
+        return "manager/reservationList :: reservation-content";
+    }
+
+}

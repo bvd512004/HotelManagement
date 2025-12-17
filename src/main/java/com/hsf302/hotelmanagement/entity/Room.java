@@ -13,7 +13,7 @@ public class Room {
     @Column(name="RoomId")
     private int roomId;
 
-    @Column(name="RoomName",columnDefinition = "Nvarchar")
+    @Column(name="RoomName", columnDefinition = "NVARCHAR(50)")
     private String roomName;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,6 +40,13 @@ public class Room {
         this.roomStatus = roomStatus;
         this.floor = floor;
         this.reservation_rooms = reservation_rooms;
+    }
+
+    public Room(String name, RoomType t, Room_Status rs, Floor f) {
+        this.roomName = name;
+        this.roomType = t;
+        this.roomStatus = rs;
+        this.floor = f;
     }
 
     public int getRoomId() {
