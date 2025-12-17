@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="add-room-type-form">
+    <h1>Add New Room Type</h1>
+    <form action="/manager/add-room-type" method="post">
+        Type: <input type="text" name="name" required="" placeholder="New room type">
+        Base price: <input type="number" name="price" required=""> VNĐ
+        Capacity: <input type="number" name="capacity" required="">
+        Description: <input type="text" name="description" required="">
+        <span th:text="${mess}" style="color: red;font-size: larger;font-weight: bold;"></span>
+        <input type="submit" value="Add">
+        <button type="button" onclick="loadContent('/manager/rooms-fragment')">Back</button>
+    </form>
+</div>
+</body>
+</html>
