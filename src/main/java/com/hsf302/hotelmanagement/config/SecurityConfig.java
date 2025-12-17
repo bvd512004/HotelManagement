@@ -14,34 +14,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for easier testing
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                .authorizeHttpRequests(authorize -> authorize
-                        // Public endpoints
-                        .requestMatchers(
-                                "/",
-                                "/index",
-                                "/receptionist/**",
-                                "/manager/**",
-                                "/booking/**",
-                                "/rooms",
-                                "/rooms/**",
-                                "/gallery",
-                                "/api/**",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**",
-                                "/error"
-                        ).permitAll()
-                        // All other requests
-                        .anyRequest().permitAll()
-                )
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.sendRedirect("/");
-                        })
-                );
+            .csrf(csrf -> csrf.disable()) // Disable CSRF for easier testing
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+            .authorizeHttpRequests(authorize -> authorize
+                // Public endpoints
+                .requestMatchers(
+                    "/",
+                    "/index",
+                    "/receptionist/**",
+                    "/booking/**",
+                    "/api/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/error"
+                ).permitAll()
+                // All other requests
+                .anyRequest().permitAll()
+            )
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendRedirect("/");
+                })
+            );
 
         return http.build();
     }
 }
+
+
