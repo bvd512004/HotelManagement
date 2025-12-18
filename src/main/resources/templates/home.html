@@ -123,35 +123,80 @@
             transform: translateY(-2px);
         }
 
-        .user-info {
+        .user-icon-wrapper {
+            position: relative;
+        }
+
+        .user-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            color: white;
-        }
-
-        .user-name {
-            font-weight: 500;
-            font-size: 1rem;
-        }
-
-        .logout-btn {
-            background: transparent;
-            color: white;
-            padding: 0.8rem 2rem;
-            border: 2px solid white;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
+            justify-content: center;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.3s, transform 0.2s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.2);
+        .user-icon:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .user-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: #20b2aa;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            min-width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-item {
+            display: block;
+            padding: 0.8rem 1.5rem;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .user-dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f0f0f0;
+        }
+
+        .user-dropdown-item.logout-item {
+            color: #dc3545;
+            border-top: 1px solid #eee;
+        }
+
+        .user-dropdown-item.logout-item:hover {
+            background: #fee;
+            color: #c82333;
         }
 
         /* Hero Section */
@@ -342,6 +387,24 @@
             }
         }
     </style>
+    <script>
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        // Đóng dropdown khi click bên ngoài
+        document.addEventListener('click', function(event) {
+            const userIconWrapper = document.querySelector('.user-icon-wrapper');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (userIconWrapper && dropdown && !userIconWrapper.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
 </head>
 <body>
     <!-- Header -->
@@ -362,13 +425,19 @@
                 <!-- Hiển thị nút đăng nhập nếu chưa đăng nhập -->
                 <a th:href="@{/login}" class="login-btn" th:if="${user == null}">Đăng nhập</a>
                 
-                <!-- Hiển thị thông tin user và nút đăng xuất nếu đã đăng nhập -->
-                <div class="user-info" th:if="${user != null}">
-                    <span class="user-name" th:text="${user.userName}">User</span>
-                    <a th:href="@{/logout}" class="logout-btn">Đăng xuất</a>
-                </div>
-                
                 <a th:href="@{/booking}" class="book-btn">Đặt phòng ngay</a>
+                
+                <!-- Hiển thị icon user với dropdown nếu đã đăng nhập -->
+                <div class="user-icon-wrapper" th:if="${user != null}">
+                    <div class="user-icon" onclick="toggleUserDropdown()">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a th:href="@{/logout}" class="user-dropdown-item logout-item">Đăng xuất</a>
+                    </div>
+                </div>
             </div>
         </nav>
     </header>

@@ -39,16 +39,22 @@ public class SecurityConfig {
                 .requestMatchers("/", "/index", "/booking", "/booking-details",
                                 "/booking/complete", "/booking/success", "/login", "/logout",
                                 "/gallery", "/rooms", "/rooms/gallery", "/rooms/rooms").permitAll()
-
+                
+                // Manager URLs - chỉ Manager hoặc Admin
+                .requestMatchers("/manager/**", "/rooms/manager/**", "/reservations/manager/**")
+                    .hasAnyRole("MANAGER", "ADMIN")
+                
                 // Admin URLs - chỉ Admin
                 .requestMatchers("/users/**", "/rooms/create",
                                 "/rooms/edit/**", "/rooms/save").hasRole("ADMIN")
-
+                                   
+                    .requestMatchers("/rooms/list", "/tasks-management/**").hasAnyRole("ADMIN","RECEPTIONIST")
+                
                 // Housekeeping Staff URLs - chỉ HouseKeeping Staff
-                .requestMatchers("/tasks/**").hasRole("HOUSEKEEPING_STAFF")
-
+                .requestMatchers("/tasks/**").hasAnyRole("HOUSEKEEPING_STAFF","RECEPTIONIST")
+                
                 // Receptionist URLs - Receptionist hoặc Admin
-                .requestMatchers("/rooms/list","/receptionist/**", "/reservations/api/**","/tasks-management/**")
+                .requestMatchers("/receptionist/**", "/reservations/**","/room/")
                     .hasAnyRole("RECEPTIONIST", "ADMIN")
                 
                 // Manager URLs
@@ -90,7 +96,7 @@ public class SecurityConfig {
                     String role = (String) session.getAttribute("role");
                     
                     if (user != null && role != null) {
-                        // Chuyển đổi role để phù hợp với Spring Security
+
                         String springSecurityRole = convertRoleToSpringSecurityRole(role);
                         
                         // Tạo authentication object và đưa vào SecurityContext
@@ -115,6 +121,8 @@ public class SecurityConfig {
                     return "HOUSEKEEPING_STAFF";
                 } else if ("Receptionist".equals(role)) {
                     return "RECEPTIONIST";
+                } else if ("Manager".equals(role)) {
+                    return "MANAGER";
                 }
                 return role.toUpperCase().replace(" ", "_");
             }
