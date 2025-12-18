@@ -34,27 +34,32 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 // Static resources và error pages - public
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/error/**").permitAll()
-                
+
                 // Public URLs - không cần đăng nhập
-                .requestMatchers("/", "/index", "/booking", "/booking-details", 
+                .requestMatchers("/", "/index", "/booking", "/booking-details",
                                 "/booking/complete", "/booking/success", "/login", "/logout",
                                 "/gallery", "/rooms", "/rooms/gallery", "/rooms/rooms").permitAll()
-                    .requestMatchers("/manager/**","/reservations/**","/rooms").hasRole("MANAGER")
-                
+
                 // Admin URLs - chỉ Admin
-                .requestMatchers("/users/**", "/rooms/list", "/rooms/create", 
+                .requestMatchers("/users/**", "/rooms/create",
                                 "/rooms/edit/**", "/rooms/save").hasRole("ADMIN")
-                
+
                 // Housekeeping Staff URLs - chỉ HouseKeeping Staff
-                .requestMatchers("/tasks/**", "/tasks-management/**").hasRole("HOUSEKEEPING_STAFF")
-                
+                .requestMatchers("/tasks/**").hasRole("HOUSEKEEPING_STAFF")
+
                 // Receptionist URLs - Receptionist hoặc Admin
-                .requestMatchers("/receptionist/**", "/reservations/**")
+                .requestMatchers("/rooms/list","/receptionist/**", "/reservations/api/**","/tasks-management/**")
                     .hasAnyRole("RECEPTIONIST", "ADMIN")
                 
+                // Manager URLs
+                .requestMatchers("/manager/**","/rooms").hasRole("MANAGER")
+
+                // Reservations can be accessed by multiple roles
+                .requestMatchers("/reservations/**").hasAnyRole("MANAGER", "RECEPTIONIST", "ADMIN")
+
                 // API requests - public (có thể cần điều chỉnh)
                 .requestMatchers("/api/**").permitAll()
-                
+
                 // Mặc định - public
                 .anyRequest().permitAll()
             )

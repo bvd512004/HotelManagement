@@ -144,14 +144,14 @@
         }
 
         .room-card-header.booked {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f557db 100%);
         }
 
         .room-card-header.reserved {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #9395fb 0%, #5796f5 100%);
         }
 
-        .room-card-header.checked-in {
+        .room-card-header.checked-out {
             background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
         }
 
@@ -743,9 +743,9 @@
                             <div th:each="roomDTO : ${floorEntry.value}" class="room-card">
                                 <div class="room-card-header"
                                      th:classappend="${#strings.toLowerCase(roomDTO.status) == 'available' ? 'available' :
-                                                  #strings.toLowerCase(roomDTO.status) == 'booked' ? 'booked' :
+                                                  #strings.toLowerCase(roomDTO.status) == 'checkedout' ? 'booked' :
                                                   #strings.toLowerCase(roomDTO.status) == 'reserved' ? 'reserved' :
-                                                      #strings.toLowerCase(roomDTO.status) == 'checked-in' ? 'checked-in' : ''}">
+                                                      #strings.toLowerCase(roomDTO.status) == 'checkedin' ? 'checked-in' : ''}">
                                     <span class="room-status-badge" th:text="${roomDTO.status}"></span>
                                     <div class="room-number" th:text="${roomDTO.room.roomName}"></div>
                                     <div class="room-type" th:text="${roomDTO.room.roomType.typeName}"></div>
