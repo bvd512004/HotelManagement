@@ -205,7 +205,7 @@ public class RoomController {
         model.addAttribute("startDate", filterStartDate);
         model.addAttribute("endDate", filterEndDate);
         model.addAttribute("selectedStatus", status);
-        model.addAttribute("statusOptions", Arrays.asList("Booked", "Reserved", "Available"));
+        model.addAttribute("statusOptions", Arrays.asList("CheckedIn","CheckedOut", "Reserved", "Available"));
 
         return "room-list";
     }
